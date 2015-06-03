@@ -5,12 +5,13 @@
 
 using namespace std;
 
-enum color_type {BLUE = 1, GREEN = 2, CYAN = 3, RED = 4, MAGENTA = 5, YELLOW = 6, WHITE = 7};
+enum color_type {BLANK = 0, BLUE = 1, GREEN = 2, CYAN = 3, RED = 4, MAGENTA = 5, YELLOW = 6, WHITE = 7};
 
 inline color_type toColor(string s);
 inline string colorToString(color_type c);
 
 inline color_type toColor(string s) {
+    if (s == "000") return BLANK;
     if (s == "001") return BLUE;
     if (s == "010") return GREEN;
     if (s == "011") return CYAN;
@@ -23,6 +24,7 @@ inline color_type toColor(string s) {
 
 inline string colorToString(color_type c) {
     switch (c) {
+        case BLANK: return "BLANK";
         case BLUE: return "BLUE";
         case GREEN: return "GREEN";
         case CYAN: return "CYAN";
