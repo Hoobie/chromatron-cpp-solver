@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include "device_type.h"
+#include "color_type.h"
 
 using namespace std;
 
@@ -11,9 +12,9 @@ class Device {
     unsigned int x;
     unsigned int y;
     unsigned short direction;
-    unsigned short color;
+    color_type color;
 public:
-    Device(string type, unsigned int x, unsigned int y, unsigned short direction, unsigned short color);
+    Device(string type, unsigned int x, unsigned int y, unsigned short direction, string color);
     ~Device();
     unsigned short getDirectionsCount();
     friend ostream& operator<<(ostream& os, const Device& d);

@@ -12,9 +12,9 @@ int main() {
     cin >> width >> height >> devicesCount;
 
     for (int i = 0; i < devicesCount; i++) {
-        string type;
+        string type, color;
         unsigned int x, y = 0;
-        unsigned short direction, color = 0;
+        unsigned short direction = 0;
         cin >> type >> x >> y >> direction >> color;
         Device device = Device(type, x, y, direction, color);
         devices.push_back(device);
