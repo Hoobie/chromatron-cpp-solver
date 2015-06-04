@@ -9,6 +9,8 @@ enum device_type {ES = 0, LU = 1, LP = 2, LK = 3, RU = 4, TG = 5, BL = 6};
 
 inline device_type toDeviceType(string s);
 inline string deviceTypeToString(device_type dt);
+inline bool isLaser(device_type dt);
+inline bool isMirror(device_type dt);
 
 inline device_type toDeviceType(string s) {
     if (s == "ES") return ES;
@@ -32,6 +34,14 @@ inline string deviceTypeToString(device_type dt) {
         case BL: return "BL";
     }
     return "";
+}
+
+inline bool isLaser(device_type dt) {
+    return dt == ES;
+}
+
+inline bool isMirror(device_type dt) {
+    return dt == LU || dt == LP || dt == LK;
 }
 
 #endif //CHROMATRON_CPP_SOLVER_UTIL_H

@@ -4,19 +4,16 @@
 #include <iostream>
 #include "device_type.h"
 #include "color_type.h"
+#include "Cell.h"
 
 using namespace std;
 
-class Device {
+class Device : public Cell {
     device_type type;
-    unsigned int x;
-    unsigned int y;
-    unsigned short direction;
-    color_type color;
 public:
     Device(string type, unsigned int x, unsigned int y, unsigned short direction, string color);
     ~Device();
-    unsigned short getDirectionsCount();
+    device_type getDeviceType();
     friend ostream& operator<<(ostream& os, const Device& d);
 };
 
