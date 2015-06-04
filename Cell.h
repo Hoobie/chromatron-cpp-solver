@@ -12,6 +12,7 @@ protected:
     unsigned short direction;
 public:
     Cell(unsigned int x, unsigned int y, unsigned short direction, string color);
+    Cell();
 };
 
 

@@ -7,3 +7,5 @@ Cell::Cell(unsigned int x, unsigned int y, unsigned short direction, string colo
     this->color = toColor(color);
 }
 
+Cell::Cell() {
+}

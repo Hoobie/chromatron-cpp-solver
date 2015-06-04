@@ -12,6 +12,9 @@ int main() {
     cin >> width >> height >> devicesCount;
 
     Cell** board = new Cell*[width];
+    for (int i = 0; i < width; i++) {
+        board[i] = new Cell[height];
+    }
 
     for (int i = 0; i < devicesCount; i++) {
         string type, color;
@@ -24,18 +27,14 @@ int main() {
 
         // add blocks, pipes and targets
         if (!isLaser(device.getDeviceType()) && !isMirror(device.getDeviceType())) {
-            Cell c = Cell(x, y, direction, color);
-            board[x][y] = c;
+            board[x][y] = device;
         }
     }
 
     // TODO: add lasers and rays to the board
 
     for (int i = 0; i < width; ++i) {
-        if (board[i] != NULL) {
-            delete board[i];
-        }
-        delete[] board[i];
+        delete board[i];
     }
     delete [] board;
 
