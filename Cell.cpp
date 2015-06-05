@@ -71,7 +71,7 @@ ostream& operator<<(ostream& os, const Cell& c) {
         os << "=";
     }
     if (isTarget(c.type)) {
-        os << ".";
+        os << "o";
     }
     if (!c.rays.empty()) {
         switch(c.rays[0].direction) {
