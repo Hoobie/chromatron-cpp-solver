@@ -4,15 +4,10 @@
 #include "Cell.h"
 
 void addRays(vector<vector<Cell>> board, int width, int height, Cell &laser);
-
 pair<short, short> getRaySteps(unsigned short direction);
-
 unsigned short laserToPipeDirection(unsigned short laserDirection);
-
 bool solve(vector<vector<Cell>> board, int width, int height, vector<Cell> mirrors);
-
 void printBoard(vector<vector<Cell>> board, int width, int height);
-
 void prepareBoardCopy(vector<vector<Cell>> &boardCopy, vector<Cell> mirrorsCopy, unsigned int x, unsigned int y,
                       unsigned short mirrorDirection);
 
