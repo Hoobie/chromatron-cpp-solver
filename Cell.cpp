@@ -64,15 +64,6 @@ ostream& operator<<(ostream& os, const Cell& c) {
     if (isLaser(c.type)) {
         os << "*";
     }
-    if (isMirror(c.type)) {
-        os << "()";
-    }
-    if (isPipe(c.type)) {
-        os << "=";
-    }
-    if (isTarget(c.type)) {
-        os << "o";
-    }
     if (!c.rays.empty()) {
         switch(c.rays[0].direction) {
             case 0:
@@ -96,6 +87,15 @@ ostream& operator<<(ostream& os, const Cell& c) {
         }
     } else if (c.type == NONE) {
         os << ".";
+    }
+    if (isMirror(c.type)) {
+        os << "()";
+    }
+    if (isPipe(c.type)) {
+        os << "=";
+    }
+    if (isTarget(c.type)) {
+        os << "o";
     }
     return os;
 }
