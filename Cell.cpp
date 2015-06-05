@@ -13,8 +13,9 @@ Cell::Cell(cell_type type, unsigned int x, unsigned int y, unsigned short direct
     this->color = color;
 }
 
-Cell::Cell(string type, unsigned int x, unsigned int y, unsigned short direction, string color) : Cell(toCellType(type), x, y, direction, toColor(color))
-{ };
+Cell::Cell(string type, unsigned int x, unsigned int y, unsigned short direction, string color)
+        : Cell(toCellType(type), x, y, direction, toColor(color)) {
+}
 
 
 cell_type Cell::getCellType() {
