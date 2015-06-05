@@ -396,92 +396,97 @@ bool solve(vector<vector<Cell>> &board, unsigned int width, unsigned int height,
             Cell &cell = board[x][y];
             if (!cell.getRays().empty() && cell.getCellType() != VISITED) {
                 for (auto &mirror : mirrors) {
-                    if (mirror.getCellType() == LP) {
-                        vector<vector<Cell>> boardCopy1(board);
-                        vector<vector<Cell>> boardCopy2(board);
-                        vector<vector<Cell>> boardCopy3(board);
-                        vector<vector<Cell>> boardCopy4(board);
-                        vector<vector<Cell>> boardCopy5(board);
+                    try {
+                        if (mirror.getCellType() == LP) {
+                            vector<vector<Cell>> boardCopy1(board);
+                            vector<vector<Cell>> boardCopy2(board);
+                            vector<vector<Cell>> boardCopy3(board);
+                            vector<vector<Cell>> boardCopy4(board);
+                            vector<vector<Cell>> boardCopy5(board);
 
-                        vector<Cell> mirrorsCopy1;
-                        vector<Cell> mirrorsCopy2;
-                        vector<Cell> mirrorsCopy3;
-                        vector<Cell> mirrorsCopy4;
-                        vector<Cell> mirrorsCopy5;
-                        for (auto &m : mirrors) {
-                            mirrorsCopy1.push_back(m.copyCell());
-                            mirrorsCopy2.push_back(m.copyCell());
-                            mirrorsCopy3.push_back(m.copyCell());
-                            mirrorsCopy4.push_back(m.copyCell());
-                            mirrorsCopy5.push_back(m.copyCell());
+                            vector<Cell> mirrorsCopy1;
+                            vector<Cell> mirrorsCopy2;
+                            vector<Cell> mirrorsCopy3;
+                            vector<Cell> mirrorsCopy4;
+                            vector<Cell> mirrorsCopy5;
+                            for (auto &m : mirrors) {
+                                mirrorsCopy1.push_back(m.copyCell());
+                                mirrorsCopy2.push_back(m.copyCell());
+                                mirrorsCopy3.push_back(m.copyCell());
+                                mirrorsCopy4.push_back(m.copyCell());
+                                mirrorsCopy5.push_back(m.copyCell());
+                            }
+
+                            prepareBoardCopy(boardCopy1, width, height, mirrorsCopy1, x, y, 0);
+                            prepareBoardCopy(boardCopy2, width, height, mirrorsCopy2, x, y, 1);
+                            prepareBoardCopy(boardCopy3, width, height, mirrorsCopy3, x, y, 2);
+                            prepareBoardCopy(boardCopy4, width, height, mirrorsCopy4, x, y, 3);
+
+                            boardCopy5[x][y].setType(VISITED);
+
+                            return solve(boardCopy1, width, height, mirrorsCopy1) ||
+                                   solve(boardCopy2, width, height, mirrorsCopy2) ||
+                                   solve(boardCopy3, width, height, mirrorsCopy3) ||
+                                   solve(boardCopy4, width, height, mirrorsCopy4) ||
+                                   solve(boardCopy5, width, height, mirrorsCopy5);
+                        } else {
+                            vector<vector<Cell>> boardCopy1(board);
+                            vector<vector<Cell>> boardCopy2(board);
+                            vector<vector<Cell>> boardCopy3(board);
+                            vector<vector<Cell>> boardCopy4(board);
+                            vector<vector<Cell>> boardCopy5(board);
+                            vector<vector<Cell>> boardCopy6(board);
+                            vector<vector<Cell>> boardCopy7(board);
+                            vector<vector<Cell>> boardCopy8(board);
+                            vector<vector<Cell>> boardCopy9(board);
+
+                            vector<Cell> mirrorsCopy1;
+                            vector<Cell> mirrorsCopy2;
+                            vector<Cell> mirrorsCopy3;
+                            vector<Cell> mirrorsCopy4;
+                            vector<Cell> mirrorsCopy5;
+                            vector<Cell> mirrorsCopy6;
+                            vector<Cell> mirrorsCopy7;
+                            vector<Cell> mirrorsCopy8;
+                            vector<Cell> mirrorsCopy9;
+                            for (auto &m : mirrors) {
+                                mirrorsCopy1.push_back(m.copyCell());
+                                mirrorsCopy2.push_back(m.copyCell());
+                                mirrorsCopy3.push_back(m.copyCell());
+                                mirrorsCopy4.push_back(m.copyCell());
+                                mirrorsCopy5.push_back(m.copyCell());
+                                mirrorsCopy6.push_back(m.copyCell());
+                                mirrorsCopy7.push_back(m.copyCell());
+                                mirrorsCopy8.push_back(m.copyCell());
+                                mirrorsCopy9.push_back(m.copyCell());
+                            }
+
+                            prepareBoardCopy(boardCopy1, width, height, mirrorsCopy1, x, y, 0);
+                            prepareBoardCopy(boardCopy2, width, height, mirrorsCopy2, x, y, 1);
+                            prepareBoardCopy(boardCopy3, width, height, mirrorsCopy3, x, y, 2);
+                            prepareBoardCopy(boardCopy4, width, height, mirrorsCopy4, x, y, 3);
+                            prepareBoardCopy(boardCopy5, width, height, mirrorsCopy5, x, y, 4);
+                            prepareBoardCopy(boardCopy6, width, height, mirrorsCopy6, x, y, 5);
+                            prepareBoardCopy(boardCopy7, width, height, mirrorsCopy7, x, y, 6);
+                            prepareBoardCopy(boardCopy8, width, height, mirrorsCopy8, x, y, 7);
+
+                            boardCopy9[x][y].setType(VISITED);
+
+                            return solve(boardCopy1, width, height, mirrorsCopy1) ||
+                                   solve(boardCopy2, width, height, mirrorsCopy2) ||
+                                   solve(boardCopy3, width, height, mirrorsCopy3) ||
+                                   solve(boardCopy4, width, height, mirrorsCopy4) ||
+                                   solve(boardCopy5, width, height, mirrorsCopy5) ||
+                                   solve(boardCopy6, width, height, mirrorsCopy6) ||
+                                   solve(boardCopy7, width, height, mirrorsCopy7) ||
+                                   solve(boardCopy8, width, height, mirrorsCopy8) ||
+                                   solve(boardCopy9, width, height, mirrorsCopy9);
                         }
-
-                        prepareBoardCopy(boardCopy1, width, height, mirrorsCopy1, x, y, 0);
-                        prepareBoardCopy(boardCopy2, width, height, mirrorsCopy2, x, y, 1);
-                        prepareBoardCopy(boardCopy3, width, height, mirrorsCopy3, x, y, 2);
-                        prepareBoardCopy(boardCopy4, width, height, mirrorsCopy4, x, y, 3);
-
-                        boardCopy5[x][y].setType(VISITED);
-
-                        return solve(boardCopy1, width, height, mirrorsCopy1) ||
-                               solve(boardCopy2, width, height, mirrorsCopy2) ||
-                               solve(boardCopy3, width, height, mirrorsCopy3) ||
-                               solve(boardCopy4, width, height, mirrorsCopy4) ||
-                               solve(boardCopy5, width, height, mirrorsCopy5);
-                    } else {
-                        vector<vector<Cell>> boardCopy1(board);
-                        vector<vector<Cell>> boardCopy2(board);
-                        vector<vector<Cell>> boardCopy3(board);
-                        vector<vector<Cell>> boardCopy4(board);
-                        vector<vector<Cell>> boardCopy5(board);
-                        vector<vector<Cell>> boardCopy6(board);
-                        vector<vector<Cell>> boardCopy7(board);
-                        vector<vector<Cell>> boardCopy8(board);
-                        vector<vector<Cell>> boardCopy9(board);
-
-                        vector<Cell> mirrorsCopy1;
-                        vector<Cell> mirrorsCopy2;
-                        vector<Cell> mirrorsCopy3;
-                        vector<Cell> mirrorsCopy4;
-                        vector<Cell> mirrorsCopy5;
-                        vector<Cell> mirrorsCopy6;
-                        vector<Cell> mirrorsCopy7;
-                        vector<Cell> mirrorsCopy8;
-                        vector<Cell> mirrorsCopy9;
-                        for (auto &m : mirrors) {
-                            mirrorsCopy1.push_back(m.copyCell());
-                            mirrorsCopy2.push_back(m.copyCell());
-                            mirrorsCopy3.push_back(m.copyCell());
-                            mirrorsCopy4.push_back(m.copyCell());
-                            mirrorsCopy5.push_back(m.copyCell());
-                            mirrorsCopy6.push_back(m.copyCell());
-                            mirrorsCopy7.push_back(m.copyCell());
-                            mirrorsCopy8.push_back(m.copyCell());
-                            mirrorsCopy9.push_back(m.copyCell());
-                        }
-
-                        prepareBoardCopy(boardCopy1, width, height, mirrorsCopy1, x, y, 0);
-                        prepareBoardCopy(boardCopy2, width, height, mirrorsCopy2, x, y, 1);
-                        prepareBoardCopy(boardCopy3, width, height, mirrorsCopy3, x, y, 2);
-                        prepareBoardCopy(boardCopy4, width, height, mirrorsCopy4, x, y, 3);
-                        prepareBoardCopy(boardCopy5, width, height, mirrorsCopy5, x, y, 4);
-                        prepareBoardCopy(boardCopy6, width, height, mirrorsCopy6, x, y, 5);
-                        prepareBoardCopy(boardCopy7, width, height, mirrorsCopy7, x, y, 6);
-                        prepareBoardCopy(boardCopy8, width, height, mirrorsCopy8, x, y, 7);
-
-                        boardCopy9[x][y].setType(VISITED);
-
-                        return solve(boardCopy1, width, height, mirrorsCopy1) ||
-                               solve(boardCopy2, width, height, mirrorsCopy2) ||
-                               solve(boardCopy3, width, height, mirrorsCopy3) ||
-                               solve(boardCopy4, width, height, mirrorsCopy4) ||
-                               solve(boardCopy5, width, height, mirrorsCopy5) ||
-                               solve(boardCopy6, width, height, mirrorsCopy6) ||
-                               solve(boardCopy7, width, height, mirrorsCopy7) ||
-                               solve(boardCopy8, width, height, mirrorsCopy8) ||
-                               solve(boardCopy9, width, height, mirrorsCopy9);
+                    } catch (int e) {
+                        return false;
                     }
                 }
+
             }
         }
     }
