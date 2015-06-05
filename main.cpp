@@ -237,6 +237,9 @@ void changeRays(vector<vector<Cell>> &board, int width, int height, Cell &device
         cell.setX(i.first);
         cell.setY(i.second);
         cell.addRay(ray);
+        if (isTarget(cell.getCellType())) {
+            break;
+        }
     }
 }
 
