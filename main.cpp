@@ -147,7 +147,7 @@ public:
     Cell();
     Cell(cell_type type, unsigned int x, unsigned int y, unsigned short direction, color_type color);
     Cell(string type, unsigned int x, unsigned int y, unsigned short direction, string color);
-    Cell clone() const { return Cell(*this); }
+    Cell copyCell() const { return Cell(*this); }
     cell_type getCellType();
     void setType(cell_type type);
     unsigned int getX();
@@ -401,11 +401,11 @@ bool solve(vector<vector<Cell>> &board, unsigned int width, unsigned int height,
                         vector<Cell> mirrorsCopy4;
                         vector<Cell> mirrorsCopy5;
                         for (auto &m : mirrors) {
-                            mirrorsCopy1.push_back(m.clone());
-                            mirrorsCopy2.push_back(m.clone());
-                            mirrorsCopy3.push_back(m.clone());
-                            mirrorsCopy4.push_back(m.clone());
-                            mirrorsCopy5.push_back(m.clone());
+                            mirrorsCopy1.push_back(m.copyCell());
+                            mirrorsCopy2.push_back(m.copyCell());
+                            mirrorsCopy3.push_back(m.copyCell());
+                            mirrorsCopy4.push_back(m.copyCell());
+                            mirrorsCopy5.push_back(m.copyCell());
                         }
 
                         prepareBoardCopy(boardCopy1, width, height, mirrorsCopy1, x, y, 0);
@@ -441,15 +441,15 @@ bool solve(vector<vector<Cell>> &board, unsigned int width, unsigned int height,
                         vector<Cell> mirrorsCopy8;
                         vector<Cell> mirrorsCopy9;
                         for (auto &m : mirrors) {
-                            mirrorsCopy1.push_back(m.clone());
-                            mirrorsCopy2.push_back(m.clone());
-                            mirrorsCopy3.push_back(m.clone());
-                            mirrorsCopy4.push_back(m.clone());
-                            mirrorsCopy5.push_back(m.clone());
-                            mirrorsCopy6.push_back(m.clone());
-                            mirrorsCopy7.push_back(m.clone());
-                            mirrorsCopy8.push_back(m.clone());
-                            mirrorsCopy9.push_back(m.clone());
+                            mirrorsCopy1.push_back(m.copyCell());
+                            mirrorsCopy2.push_back(m.copyCell());
+                            mirrorsCopy3.push_back(m.copyCell());
+                            mirrorsCopy4.push_back(m.copyCell());
+                            mirrorsCopy5.push_back(m.copyCell());
+                            mirrorsCopy6.push_back(m.copyCell());
+                            mirrorsCopy7.push_back(m.copyCell());
+                            mirrorsCopy8.push_back(m.copyCell());
+                            mirrorsCopy9.push_back(m.copyCell());
                         }
 
                         prepareBoardCopy(boardCopy1, width, height, mirrorsCopy1, x, y, 0);
