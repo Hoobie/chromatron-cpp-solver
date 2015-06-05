@@ -22,11 +22,11 @@ class Cell {
     color_type color;
     /*
      * directions (from laser definition):
-     * ___________
-     * |7   6   5|
-     * |0   x   4|
-     * |1   2   3|
-     * -----------
+     * _________
+     * |7  6  5|
+     * |0  x  4|
+     * |1  2  3|
+     * ---------
      */
     unsigned short direction;
     vector<ray_type> rays;
