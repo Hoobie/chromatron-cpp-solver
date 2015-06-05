@@ -33,9 +33,7 @@ public:
     cell_type getCellType();
     void setType(cell_type type);
     unsigned int getX();
-    void setX(unsigned int x);
     unsigned int getY();
-    void setY(unsigned int x);
     color_type getColor();
     void setColor(color_type color);
     unsigned short getDirection();

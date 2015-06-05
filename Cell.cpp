@@ -21,6 +21,10 @@ cell_type Cell::getCellType() {
     return type;
 }
 
+void Cell::setType(cell_type type) {
+    this->type = type;
+}
+
 unsigned int Cell::getX() {
     return x;
 }
@@ -33,24 +37,12 @@ color_type Cell::getColor() {
     return color;
 }
 
-unsigned short Cell::getDirection() {
-    return direction;
-}
-
-void Cell::setType(cell_type type) {
-    this->type = type;
-}
-
-void Cell::setX(unsigned int x) {
-    this->x = x;
-}
-
-void Cell::setY(unsigned int x) {
-    this->y = y;
-}
-
 void Cell::setColor(color_type color) {
     this->color = color;
+}
+
+unsigned short Cell::getDirection() {
+    return direction;
 }
 
 void Cell::setDirection(unsigned short direction) {
