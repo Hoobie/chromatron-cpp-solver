@@ -24,14 +24,14 @@ inline color_type toColor(string s) {
 
 inline string colorToString(color_type c) {
     switch (c) {
-        case BLANK: return "BLANK";
-        case BLUE: return "BLUE";
-        case GREEN: return "GREEN";
-        case CYAN: return "CYAN";
-        case RED: return "RED";
-        case MAGENTA: return "MAGENTA";
-        case YELLOW: return "YELLOW";
-        case WHITE: return "WHITE";
+        case BLANK: return "000";
+        case BLUE: return "001";
+        case GREEN: return "010";
+        case CYAN: return "011";
+        case RED: return "100";
+        case MAGENTA: return "101";
+        case YELLOW: return "110";
+        case WHITE: return "111";
     }
     return "BLANK";
 }

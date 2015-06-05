@@ -4,6 +4,8 @@
 #include "cell_type.h"
 #include "Cell.h"
 
+#define DEBUG false
+
 void changeRays(vector<vector<Cell>> &board, int width, int height, Cell &device, bool remove);
 pair<short, short> getRaySteps(unsigned short direction);
 unsigned short laserToPipeDirection(unsigned short laserDirection);
@@ -17,9 +19,11 @@ bool isBoardCompleted(vector<vector<Cell>> board, int width, int height);
 
 using namespace std;
 
+unsigned int width, height, devicesCount = 0;
+
 int main() {
 
-    unsigned int width, height, devicesCount = 0;
+    width, height, devicesCount = 0;
     vector<Cell> devices;
     vector<Cell> mirrors;
 
@@ -52,10 +56,8 @@ int main() {
         }
     }
 
-    printBoard(board, width, height);
-
     // solve
-    if (!solve(board, width, height, mirrors)) {
+    if (!solve(board, width, height, mirrors) && DEBUG) {
         cout << "No solution" << endl;
     }
 
@@ -63,17 +65,46 @@ int main() {
 }
 
 void printBoard(vector<vector<Cell>> board, int width, int height) {
+    cout << width - 1 << " " << height - 1 << endl;
+    cout << devicesCount << endl;
     for (int y = 1; y < height; y++) {
         for (int x = 1; x < width; x++) {
-            cout << board[x][y];
+            Cell cell = board[x][y];
+            cell_type type = cell.getCellType();
+            if (isMirror(type)) {
+                cout << cellTypeToString(type) << " " << x << " " << y << " " << cell.getDirection() << " " << 0 << endl;
+                continue;
+            }
+            if (isLaser(type)) {
+                cout << cellTypeToString(type) << " " << x << " " << y << " " << cell.getDirection() << " " << colorToString(cell.getColor()) << endl;
+                continue;
+            }
+            if (isTarget(type)) {
+                cout << cellTypeToString(type) << " " << x << " " << y << " " << 0 << " " << colorToString(cell.getColor()) << endl;
+                continue;
+            }
+            if (isPipe(type)) {
+                cout << cellTypeToString(type) << " " << x << " " << y << " " << cell.getDirection() << " " << 0 << endl;
+                continue;
+            }
+            if (isPipe(type)) {
+                cout << cellTypeToString(type) << " " << x << " " << y << " " << 0 << " " << 0 << endl;
+                continue;
+            }
         }
-        cout << endl;
+    }
+
+    if (DEBUG) {
+        for (int y = 1; y < height; y++) {
+            for (int x = 1; x < width; x++) {
+                cout << board[x][y];
+            }
+        }
     }
 }
 
 bool solve(vector<vector<Cell>> &board, int width, int height, vector<Cell> &mirrors) {
     if (isBoardCompleted(board, width, height)) {
-        cout << endl << "completed!" << endl;
         printBoard(board, width, height);
         return true;
     }
