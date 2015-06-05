@@ -49,7 +49,7 @@ inline string cellTypeToString(cell_type dt) {
         case NONE: return "NONE";
         case VISITED: return "VISITED";
     }
-    return "";
+    return "NONE";
 }
 
 inline bool isLaser(cell_type dt) {

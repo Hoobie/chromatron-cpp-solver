@@ -82,7 +82,8 @@ bool solve(vector<vector<Cell>> &board, int width, int height, vector<Cell> &mir
     }
     for (unsigned int y = 1; y < height; y++) {
         for (unsigned int x = 1; x < width; x++) {
-            if (!board[x][y].getRays().empty()) {
+            Cell &cell = board[x][y];
+            if (!cell.getRays().empty() && cell.getCellType() != VISITED) {
                 for (auto &mirror : mirrors) {
                     if (mirror.getCellType() == LP) {
                         vector<vector<Cell>> boardCopy1(board);
@@ -109,8 +110,7 @@ bool solve(vector<vector<Cell>> &board, int width, int height, vector<Cell> &mir
                         prepareBoardCopy(boardCopy3, width, height, mirrorsCopy3, x, y, 2);
                         prepareBoardCopy(boardCopy4, width, height, mirrorsCopy4, x, y, 3);
 
-                        Cell visitedCell = Cell(VISITED, x, y, 0, WHITE);
-                        boardCopy5[x][y] = visitedCell;
+                        boardCopy5[x][y].setType(VISITED);
 
                         return solve(boardCopy1, width, height, mirrorsCopy1) ||
                                solve(boardCopy2, width, height, mirrorsCopy2) ||
@@ -158,8 +158,7 @@ bool solve(vector<vector<Cell>> &board, int width, int height, vector<Cell> &mir
                         prepareBoardCopy(boardCopy7, width, height, mirrorsCopy7, x, y, 6);
                         prepareBoardCopy(boardCopy8, width, height, mirrorsCopy8, x, y, 7);
 
-                        Cell visitedCell = Cell(VISITED, x, y, 0, WHITE);
-                        boardCopy9[x][y] = visitedCell;
+                        boardCopy9[x][y].setType(VISITED);
 
                         return solve(boardCopy1, width, height, mirrorsCopy1) ||
                                solve(boardCopy2, width, height, mirrorsCopy2) ||
@@ -215,13 +214,13 @@ void changeRays(vector<vector<Cell>> &board, int width, int height, Cell &device
 
         const ray_type &ray = { device.getDirection(), device.getColor() };
 
-        vector<ray_type> rays = cell.getRays();
+        vector<ray_type> &rays = cell.getRays();
         const vector<::ray_type>::iterator &iterator = find(rays.begin(), rays.end(), ray);
         if (iterator != rays.end()) {
             if (remove) {
                 rays.erase(iterator);
             }
-            break;
+            continue;
         }
 
         if (isPipe(cell.getCellType())) {

@@ -47,7 +47,7 @@ public:
     void setDirection(unsigned short direction);
     friend ostream& operator<<(ostream& os, const Cell& c);
     void addRay(ray_type ray);
-    vector<ray_type> getRays();
+    vector<ray_type> & getRays();
 };
 
 

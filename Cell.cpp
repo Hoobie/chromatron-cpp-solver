@@ -3,6 +3,7 @@
 
 Cell::Cell() {
     this->type = NONE;
+    this->color = BLANK;
 }
 
 Cell::Cell(cell_type type, unsigned int x, unsigned int y, unsigned short direction, color_type color) {
@@ -112,6 +113,6 @@ void Cell::addRay(ray_type ray) {
     rays.push_back(ray);
 }
 
-vector<ray_type> Cell::getRays() {
+vector<ray_type> & Cell::getRays() {
     return rays;
 }
