@@ -60,9 +60,23 @@ void Cell::setDirection(unsigned short direction) {
 ostream& operator<<(ostream& os, const Cell& c) {
     if (isBlock(c.type)) {
         os << "X";
+        return os;
     }
     if (isLaser(c.type)) {
         os << "*";
+        return os;
+    }
+    if (isMirror(c.type)) {
+        os << ")";
+        return os;
+    }
+    if (isPipe(c.type)) {
+        os << "=";
+        return os;
+    }
+    if (isTarget(c.type)) {
+        os << "o";
+        return os;
     }
     if (!c.rays.empty()) {
         switch(c.rays[0].direction) {
@@ -85,17 +99,10 @@ ostream& operator<<(ostream& os, const Cell& c) {
             default:
                 os << "R";
         }
+        return os;
     } else if (c.type == NONE) {
         os << ".";
-    }
-    if (isMirror(c.type)) {
-        os << ")";
-    }
-    if (isPipe(c.type)) {
-        os << "=";
-    }
-    if (isTarget(c.type)) {
-        os << "o";
+        return os;
     }
     return os;
 }

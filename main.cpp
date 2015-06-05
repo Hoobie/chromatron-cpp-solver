@@ -4,16 +4,16 @@
 #include "cell_type.h"
 #include "Cell.h"
 
-void addRays(vector<vector<Cell>> &board, int width, int height, Cell &device);
+void changeRays(vector<vector<Cell>> &board, int width, int height, Cell &device, bool remove);
 pair<short, short> getRaySteps(unsigned short direction);
 unsigned short laserToPipeDirection(unsigned short laserDirection);
 bool solve(vector<vector<Cell>> board, int width, int height, vector<Cell> mirrors);
 void printBoard(vector<vector<Cell>> board, int width, int height);
-void prepareBoardCopy(vector<vector<Cell>> &boardCopy, vector<Cell> &mirrorsCopy, unsigned int x, unsigned int y,
-                      unsigned short mirrorDirection);
-
+void prepareBoardCopy(vector<vector<Cell>> &boardCopy, int width, int height, vector<Cell> &mirrorsCopy, unsigned int x,
+                      unsigned int y, unsigned short mirrorDirection);
 unsigned short getReflectionDirection(cell_type mirror_type, unsigned short mirrorDirection,
                                       unsigned short rayDirection);
+bool isBoardCompleted(vector<vector<Cell>> board, int width, int height);
 
 using namespace std;
 
@@ -45,7 +45,7 @@ int main() {
     // add lasers and rays, gather mirrors
     for (auto &dev : devices) {
         if (isLaser(dev.getCellType())) {
-            addRays(board, width, height, dev);
+            changeRays(board, width, height, dev, false);
         }
         if (isMirror(dev.getCellType())) {
             mirrors.push_back(dev);
@@ -72,8 +72,10 @@ void printBoard(vector<vector<Cell>> board, int width, int height) {
 }
 
 bool solve(vector<vector<Cell>> board, int width, int height, vector<Cell> mirrors) {
-    if (false) {
+    if (isBoardCompleted(board, width, height)) {
+        cout << endl << "completed!" << endl;
         printBoard(board, width, height);
+        return true;
     }
     if (mirrors.empty()) {
         return false;
@@ -102,10 +104,10 @@ bool solve(vector<vector<Cell>> board, int width, int height, vector<Cell> mirro
                             mirrorsCopy5.push_back(m.clone());
                         }
 
-                        prepareBoardCopy(boardCopy1, mirrorsCopy1, x, y, 0);
-                        prepareBoardCopy(boardCopy2, mirrorsCopy2, x, y, 1);
-                        prepareBoardCopy(boardCopy3, mirrorsCopy3, x, y, 2);
-                        prepareBoardCopy(boardCopy4, mirrorsCopy4, x, y, 3);
+                        prepareBoardCopy(boardCopy1, width, height, mirrorsCopy1, x, y, 0);
+                        prepareBoardCopy(boardCopy2, width, height, mirrorsCopy2, x, y, 1);
+                        prepareBoardCopy(boardCopy3, width, height, mirrorsCopy3, x, y, 2);
+                        prepareBoardCopy(boardCopy4, width, height, mirrorsCopy4, x, y, 3);
 
                         Cell visitedCell = Cell(VISITED, x, y, 0, WHITE);
                         boardCopy5[x][y] = visitedCell;
@@ -147,14 +149,14 @@ bool solve(vector<vector<Cell>> board, int width, int height, vector<Cell> mirro
                             mirrorsCopy9.push_back(m.clone());
                         }
 
-                        prepareBoardCopy(boardCopy1, mirrorsCopy1, x, y, 0);
-                        prepareBoardCopy(boardCopy2, mirrorsCopy2, x, y, 1);
-                        prepareBoardCopy(boardCopy3, mirrorsCopy3, x, y, 2);
-                        prepareBoardCopy(boardCopy4, mirrorsCopy4, x, y, 3);
-                        prepareBoardCopy(boardCopy5, mirrorsCopy5, x, y, 4);
-                        prepareBoardCopy(boardCopy6, mirrorsCopy6, x, y, 5);
-                        prepareBoardCopy(boardCopy7, mirrorsCopy7, x, y, 6);
-                        prepareBoardCopy(boardCopy8, mirrorsCopy8, x, y, 7);
+                        prepareBoardCopy(boardCopy1, width, height, mirrorsCopy1, x, y, 0);
+                        prepareBoardCopy(boardCopy2, width, height, mirrorsCopy2, x, y, 1);
+                        prepareBoardCopy(boardCopy3, width, height, mirrorsCopy3, x, y, 2);
+                        prepareBoardCopy(boardCopy4, width, height, mirrorsCopy4, x, y, 3);
+                        prepareBoardCopy(boardCopy5, width, height, mirrorsCopy5, x, y, 4);
+                        prepareBoardCopy(boardCopy6, width, height, mirrorsCopy6, x, y, 5);
+                        prepareBoardCopy(boardCopy7, width, height, mirrorsCopy7, x, y, 6);
+                        prepareBoardCopy(boardCopy8, width, height, mirrorsCopy8, x, y, 7);
 
                         Cell visitedCell = Cell(VISITED, x, y, 0, WHITE);
                         boardCopy9[x][y] = visitedCell;
@@ -173,22 +175,29 @@ bool solve(vector<vector<Cell>> board, int width, int height, vector<Cell> mirro
             }
         }
     }
-    return NULL;
+    return false;
 }
 
-void prepareBoardCopy(vector<vector<Cell>> &boardCopy, vector<Cell> &mirrorsCopy, unsigned int y, unsigned int x,
-                      unsigned short mirrorDirection) {
-    color_type color = boardCopy[x][y].getColor();
+void prepareBoardCopy(vector<vector<Cell>> &boardCopy, int width, int height, vector<Cell> &mirrorsCopy, unsigned int y,
+                      unsigned int x, unsigned short mirrorDirection) {
+    Cell &cell = boardCopy[x][y];
+
+    unsigned short direction = cell.getDirection();
+    color_type color = cell.getColor();
+
+    changeRays(boardCopy, width, height, cell, true);
+
     Cell m = mirrorsCopy.back();
     mirrorsCopy.pop_back();
-    m.setDirection(mirrorDirection);
+    m.setDirection(getReflectionDirection(m.getCellType(), mirrorDirection, direction));
     m.setX(x);
     m.setY(y);
-    boardCopy[x][y] = m;
-    // TODO: remove wrong and add new rays
+    m.setColor(color);
+    cell = m;
+    changeRays(boardCopy, width, height, cell, false);
 }
 
-void addRays(vector<vector<Cell>> &board, int width, int height, Cell &device) {
+void changeRays(vector<vector<Cell>> &board, int width, int height, Cell &device, bool remove) {
     pair<short, short> steps = getRaySteps(device.getDirection());
 
     if (steps.first == 0 && steps.second == 0) {
@@ -203,8 +212,11 @@ void addRays(vector<vector<Cell>> &board, int width, int height, Cell &device) {
         }
         const ray_type &ray = { device.getDirection(), device.getColor() };
         vector<ray_type> rays = cell.getRays();
-        if (find(rays.begin(), rays.end(), ray) != rays.end()) {
-            // if found exactly the same ray then break
+        const vector<::ray_type>::iterator &iterator = find(rays.begin(), rays.end(), ray);
+        if (iterator != rays.end()) {
+            if (remove) {
+                rays.erase(iterator);
+            }
             break;
         }
         if (isPipe(cell.getCellType())) {
@@ -216,7 +228,7 @@ void addRays(vector<vector<Cell>> &board, int width, int height, Cell &device) {
             // create pseudo-laser with proper reflection direction
             unsigned short direction = getReflectionDirection(cell.getCellType(), cell.getDirection(), device.getDirection());
             Cell pseudoLaser = Cell(NONE, i.first, i.second, direction, device.getColor());
-            addRays(board, width, height, pseudoLaser);
+            changeRays(board, width, height, pseudoLaser, remove);
             // if not splitter then only one ray
             if (cell.getCellType() != LP) {
                 break;
@@ -224,8 +236,6 @@ void addRays(vector<vector<Cell>> &board, int width, int height, Cell &device) {
         }
         cell.setX(i.first);
         cell.setY(i.second);
-        cell.setDirection(device.getDirection());
-        cell.setColor(device.getColor());
         cell.addRay(ray);
     }
 }
@@ -318,4 +328,23 @@ unsigned short laserToPipeDirection(unsigned short laserDirection) {
         default:
             return 0;
     }
+}
+
+bool isBoardCompleted(vector<vector<Cell>> board, int width, int height) {
+    for (unsigned int y = 1; y < height; y++) {
+        for (unsigned int x = 1; x < width; x++) {
+            Cell cell = board[x][y];
+            if (isTarget(cell.getCellType())) {
+                vector<ray_type> rays = cell.getRays();
+                color_type colorSum = BLANK;
+                for (auto ray : rays) {
+                    colorSum += ray.color;
+                }
+                if (colorSum != cell.getColor()) {
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
 }

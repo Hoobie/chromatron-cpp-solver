@@ -19,7 +19,7 @@ inline color_type toColor(string s) {
     if (s == "101") return MAGENTA;
     if (s == "110") return YELLOW;
     if (s == "111") return WHITE;
-    return WHITE;
+    return BLANK;
 }
 
 inline string colorToString(color_type c) {
@@ -33,7 +33,14 @@ inline string colorToString(color_type c) {
         case YELLOW: return "YELLOW";
         case WHITE: return "WHITE";
     }
-    return "";
+    return "BLANK";
+}
+
+inline void operator+=(color_type &c1, color_type &c2) {
+    if (c1 == BLANK) c1 = c2;
+    if (c1 == RED && c2 == GREEN) c1 = YELLOW;
+    if (c1 == GREEN && c2 == BLUE) c1 = CYAN;
+    if (c1 == RED && c2 == BLUE) c1 = MAGENTA;
 }
 
 #endif //CHROMATRON_CPP_SOLVER_COLOR_H
