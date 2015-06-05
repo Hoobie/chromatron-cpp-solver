@@ -89,7 +89,7 @@ ostream& operator<<(ostream& os, const Cell& c) {
         os << ".";
     }
     if (isMirror(c.type)) {
-        os << "()";
+        os << ")";
     }
     if (isPipe(c.type)) {
         os << "=";
