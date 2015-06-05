@@ -1,10 +1,286 @@
 #include <iostream>
+#include <string>
 #include <vector>
 #include <algorithm>
-#include "cell_type.h"
-#include "Cell.h"
 
 #define DEBUG false
+
+using namespace std;
+
+// =============================================== CELL TYPE ===========================================================
+
+enum cell_type {ES = 0, LU = 1, LP = 2, LK = 3, RU = 4, TG = 5, BL = 6, NONE = 7, VISITED = 8};
+
+inline cell_type toCellType(string s);
+inline string cellTypeToString(cell_type dt);
+inline bool isLaser(cell_type dt);
+inline bool isMirror(cell_type dt);
+inline bool isBlock(cell_type dt);
+inline bool isPipe(cell_type dt);
+inline bool isTarget(cell_type dt);
+
+inline cell_type toCellType(string s) {
+    // Laser
+    if (s == "ES") return ES;
+    // Mirror
+    if (s == "LU") return LU;
+    // Splitter mirror
+    if (s == "LP") return LP;
+    // Shifted mirror
+    if (s == "LK") return LK;
+    // Pipe
+    if (s == "RU") return RU;
+    // Target
+    if (s == "TG") return TG;
+    // Block
+    if (s == "BL") return BL;
+    // None - default type for rays or empty cells
+    if (s == "NONE") return NONE;
+    // VISITED - for marking visited cells
+    if (s == "VISITED") return VISITED;
+    return NONE;
+}
+
+inline string cellTypeToString(cell_type dt) {
+    switch (dt) {
+        case ES: return "ES";
+        case LU: return "LU";
+        case LP: return "LP";
+        case LK: return "LK";
+        case RU: return "RU";
+        case TG: return "TG";
+        case BL: return "BL";
+        case NONE: return "NONE";
+        case VISITED: return "VISITED";
+    }
+    return "NONE";
+}
+
+inline bool isLaser(cell_type dt) {
+    return dt == ES;
+}
+
+inline bool isMirror(cell_type dt) {
+    return dt == LU || dt == LP || dt == LK;
+}
+
+inline bool isBlock(cell_type dt) {
+    return dt == BL;
+}
+
+inline bool isPipe(cell_type dt) {
+    return dt == RU;
+}
+
+inline bool isTarget(cell_type dt) {
+    return dt == TG;
+}
+
+// =============================================== COLOR TYPE ==========================================================
+
+enum color_type {BLANK = 0, BLUE = 1, GREEN = 2, CYAN = 3, RED = 4, MAGENTA = 5, YELLOW = 6, WHITE = 7};
+
+inline color_type toColor(string s);
+inline string colorToString(color_type c);
+
+inline color_type toColor(string s) {
+    if (s == "000") return BLANK;
+    if (s == "001") return BLUE;
+    if (s == "010") return GREEN;
+    if (s == "011") return CYAN;
+    if (s == "100") return RED;
+    if (s == "101") return MAGENTA;
+    if (s == "110") return YELLOW;
+    if (s == "111") return WHITE;
+    return BLANK;
+}
+
+inline string colorToString(color_type c) {
+    switch (c) {
+        case BLANK: return "000";
+        case BLUE: return "001";
+        case GREEN: return "010";
+        case CYAN: return "011";
+        case RED: return "100";
+        case MAGENTA: return "101";
+        case YELLOW: return "110";
+        case WHITE: return "111";
+    }
+    return "BLANK";
+}
+
+inline void operator+=(color_type &c1, color_type &c2) {
+    if (c1 == BLANK) c1 = c2;
+    if (c1 == RED && c2 == GREEN) c1 = YELLOW;
+    if (c1 == GREEN && c2 == BLUE) c1 = CYAN;
+    if (c1 == RED && c2 == BLUE) c1 = MAGENTA;
+}
+
+// ================================================ RAY TYPE ===========================================================
+
+struct ray_type {
+    unsigned short direction;
+    color_type color;
+
+    bool operator==(ray_type r) {
+        return (direction == r.direction && color == r.color);
+    }
+};
+
+// ================================================== CELL =============================================================
+
+class Cell {
+    cell_type type;
+    unsigned int x;
+    unsigned int y;
+    color_type color;
+    /*
+     * directions (from laser definition):
+     * _________
+     * |7  6  5|
+     * |0  x  4|
+     * |1  2  3|
+     * ---------
+     */
+    unsigned short direction;
+    vector<ray_type> rays;
+public:
+    Cell();
+    Cell(cell_type type, unsigned int x, unsigned int y, unsigned short direction, color_type color);
+    Cell(string type, unsigned int x, unsigned int y, unsigned short direction, string color);
+    Cell clone() const { return Cell(*this); }
+    cell_type getCellType();
+    void setType(cell_type type);
+    unsigned int getX();
+    void setX(unsigned int x);
+    unsigned int getY();
+    void setY(unsigned int y);
+    color_type getColor();
+    void setColor(color_type color);
+    unsigned short getDirection();
+    void setDirection(unsigned short direction);
+    friend ostream& operator<<(ostream& os, const Cell& c);
+    void addRay(ray_type ray);
+    vector<ray_type> & getRays();
+};
+
+Cell::Cell() {
+    this->type = NONE;
+    this->color = BLANK;
+}
+
+Cell::Cell(cell_type type, unsigned int x, unsigned int y, unsigned short direction, color_type color) {
+    this->type = type;
+    this->x = x;
+    this->y = y;
+    this->direction = direction;
+    this->color = color;
+}
+
+Cell::Cell(string type, unsigned int x, unsigned int y, unsigned short direction, string color)
+        : Cell(toCellType(type), x, y, direction, toColor(color)) {
+}
+
+
+cell_type Cell::getCellType() {
+    return type;
+}
+
+void Cell::setType(cell_type type) {
+    this->type = type;
+}
+
+unsigned int Cell::getX() {
+    return x;
+}
+
+void Cell::setX(unsigned int x) {
+    this->x = x;
+}
+
+unsigned int Cell::getY() {
+    return y;
+}
+
+void Cell::setY(unsigned int y) {
+    this->y = y;
+}
+
+color_type Cell::getColor() {
+    return color;
+}
+
+void Cell::setColor(color_type color) {
+    this->color = color;
+}
+
+unsigned short Cell::getDirection() {
+    return direction;
+}
+
+void Cell::setDirection(unsigned short direction) {
+    this->direction = direction;
+}
+
+ostream& operator<<(ostream& os, const Cell& c) {
+    if (isBlock(c.type)) {
+        os << "X";
+        return os;
+    }
+    if (isLaser(c.type)) {
+        os << "*";
+        return os;
+    }
+    if (isMirror(c.type)) {
+        os << ")";
+        return os;
+    }
+    if (isPipe(c.type)) {
+        os << "=";
+        return os;
+    }
+    if (isTarget(c.type)) {
+        os << "o";
+        return os;
+    }
+    if (!c.rays.empty()) {
+        switch(c.rays[0].direction) {
+            case 0:
+            case 4:
+                os << "-";
+                break;
+            case 1:
+            case 5:
+                os << "/";
+                break;
+            case 2:
+            case 6:
+                os << "|";
+                break;
+            case 3:
+            case 7:
+                os << "\\";
+                break;
+            default:
+                os << ".";
+        }
+        return os;
+    } else if (c.type == NONE) {
+        os << ".";
+        return os;
+    }
+    return os;
+}
+
+void Cell::addRay(ray_type ray) {
+    rays.push_back(ray);
+}
+
+vector<ray_type> & Cell::getRays() {
+    return rays;
+}
+
+// ============================================== DECLARATIONS =========================================================
 
 void changeRays(vector<vector<Cell>> &board, int width, int height, Cell &device, bool remove);
 pair<short, short> getRaySteps(unsigned short direction);
@@ -16,8 +292,6 @@ void prepareBoardCopy(vector<vector<Cell>> &boardCopy, int width, int height, ve
 unsigned short getReflectionDirection(cell_type mirror_type, unsigned short mirrorDirection,
                                       unsigned short rayDirection);
 bool isBoardCompleted(vector<vector<Cell>> board, int width, int height);
-
-using namespace std;
 
 unsigned int width, height, devicesCount = 0;
 
