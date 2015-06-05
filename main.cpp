@@ -2,7 +2,7 @@
 #include <vector>
 #include <algorithm>
 
-#define DEBUG false
+#define DEBUG true
 
 using namespace std;
 
@@ -288,7 +288,7 @@ void changeRays(vector<vector<Cell>> &board, unsigned int width, unsigned int he
 pair<short, short> getRaySteps(unsigned short direction);
 unsigned short laserToPipeDirection(unsigned short laserDirection);
 bool solve(vector<vector<Cell>> &board, unsigned int width, unsigned int height, vector<Cell> &mirrors);
-void printBoard(vector<vector<Cell>> board, unsigned int width, unsigned int height);
+void printBoard(vector<vector<Cell>> board, unsigned int width, unsigned int height, vector<Cell> unusedMirrors);
 void prepareBoardCopy(vector<vector<Cell>> &boardCopy, unsigned int width, unsigned int height, vector<Cell> &mirrorsCopy,
                       unsigned int x, unsigned int y, unsigned short mirrorDirection);
 unsigned short getReflectionDirection(cell_type mirror_type, unsigned short mirrorDirection,
@@ -332,18 +332,22 @@ int main() {
     }
 
     // solve
-    if (!solve(board, width, height, mirrors) && DEBUG) {
-        cout << "No solution" << endl;
+    if (!solve(board, width, height, mirrors)) {
+        cout << "Solution not found :(" << endl;
     }
 
     return 0;
 }
 
-void printBoard(vector<vector<Cell>> board, unsigned int width, unsigned int height) {
+void printBoard(vector<vector<Cell>> board, unsigned int width, unsigned int height, vector<Cell> unusedMirrors) {
     cout << width - 1 << " " << height - 1 << endl;
     cout << devicesCount << endl;
-    for (unsigned int y = 0; y < height; y++) {
-        for (unsigned int x = 0; x < width; x++) {
+    for (auto unusedMirror : unusedMirrors) {
+        cout << cellTypeToString(unusedMirror.getCellType()) << " " << unusedMirror.getX() << " " <<
+                unusedMirror.getY() << " " << unusedMirror.getDirection() << " " << 0 << endl;
+    }
+    for (unsigned int y = 1; y < height; y++) {
+        for (unsigned int x = 1; x < width; x++) {
             Cell cell = board[x][y];
             cell_type type = cell.getCellType();
             if (isMirror(type)) {
@@ -381,7 +385,7 @@ void printBoard(vector<vector<Cell>> board, unsigned int width, unsigned int hei
 
 bool solve(vector<vector<Cell>> &board, unsigned int width, unsigned int height, vector<Cell> &mirrors) {
     if (isBoardCompleted(board, width, height)) {
-        printBoard(board, width, height);
+        printBoard(board, width, height, mirrors);
         return true;
     }
     if (mirrors.empty()) {
