@@ -214,7 +214,7 @@ void addRays(vector<vector<Cell>> board, int width, int height, Cell &device) {
         }
         if (isMirror(cell.getCellType())) {
             // create pseudo-laser with proper reflection direction
-            unsigned short direction = getReflectionDirection((BL), cell.getDirection(), device.getDirection());
+            unsigned short direction = getReflectionDirection(cell.getCellType(), cell.getDirection(), device.getDirection());
             Cell pseudoLaser = Cell(NONE, i.first, i.second, direction, device.getColor());
             addRays(board, width, height, pseudoLaser);
             // if not splitter then only one ray
