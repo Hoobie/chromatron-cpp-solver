@@ -105,7 +105,7 @@ inline string colorToString(color_type c) {
         case YELLOW: return "110";
         case WHITE: return "111";
     }
-    return "BLANK";
+    return "000";
 }
 
 inline void operator+=(color_type &c1, color_type &c2) {
@@ -176,10 +176,13 @@ Cell::Cell(cell_type type, unsigned int x, unsigned int y, unsigned short direct
     this->color = color;
 }
 
-Cell::Cell(string type, unsigned int x, unsigned int y, unsigned short direction, string color)
-        : Cell(toCellType(type), x, y, direction, toColor(color)) {
+Cell::Cell(string type, unsigned int x, unsigned int y, unsigned short direction, string color) {
+    this->type = toCellType(type);
+    this->x = x;
+    this->y = y;
+    this->direction = direction;
+    this->color = toColor(color);
 }
-
 
 cell_type Cell::getCellType() {
     return type;
@@ -258,7 +261,7 @@ ostream& operator<<(ostream& os, const Cell& c) {
                 break;
             case 3:
             case 7:
-                os << "\\";
+                os << "V";
                 break;
             default:
                 os << ".";
@@ -339,8 +342,8 @@ int main() {
 void printBoard(vector<vector<Cell>> board, unsigned int width, unsigned int height) {
     cout << width - 1 << " " << height - 1 << endl;
     cout << devicesCount << endl;
-    for (unsigned int y = 1; y < height; y++) {
-        for (unsigned int x = 1; x < width; x++) {
+    for (unsigned int y = 0; y < height; y++) {
+        for (unsigned int x = 0; x < width; x++) {
             Cell cell = board[x][y];
             cell_type type = cell.getCellType();
             if (isMirror(type)) {
@@ -359,7 +362,7 @@ void printBoard(vector<vector<Cell>> board, unsigned int width, unsigned int hei
                 cout << cellTypeToString(type) << " " << x << " " << y << " " << cell.getDirection() << " " << 0 << endl;
                 continue;
             }
-            if (isPipe(type)) {
+            if (isBlock(type)) {
                 cout << cellTypeToString(type) << " " << x << " " << y << " " << 0 << " " << 0 << endl;
                 continue;
             }
@@ -371,6 +374,7 @@ void printBoard(vector<vector<Cell>> board, unsigned int width, unsigned int hei
             for (unsigned int x = 1; x < width; x++) {
                 cout << board[x][y];
             }
+            cout << endl;
         }
     }
 }
@@ -518,7 +522,7 @@ void changeRays(vector<vector<Cell>> &board, unsigned int width, unsigned int he
         const ray_type &ray = { device.getDirection(), device.getColor() };
 
         vector<ray_type> &rays = cell.getRays();
-        const vector<::ray_type>::iterator &iterator = find(rays.begin(), rays.end(), ray);
+        const vector<ray_type>::iterator &iterator = find(rays.begin(), rays.end(), ray);
         if (iterator != rays.end()) {
             if (remove) {
                 rays.erase(iterator);
