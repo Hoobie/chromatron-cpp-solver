@@ -5,7 +5,7 @@
 
 void addRays(Cell **board, int width, int height, Cell &laser);
 
-pair<short, short> getRaySteps(unsigned short laserDirection);
+pair<short, short> getRaySteps(unsigned short direction);
 
 unsigned short laserToPipeDirection(unsigned short laserDirection);
 
@@ -87,8 +87,8 @@ void addRays(Cell **board, int width, int height, Cell &laser) {
     }
 }
 
-pair<short, short> getRaySteps(unsigned short laserDirection) {
-    switch (laserDirection) {
+pair<short, short> getRaySteps(unsigned short direction) {
+    switch (direction) {
         case 0:
             return make_pair(-1, 0);
         case 1:
