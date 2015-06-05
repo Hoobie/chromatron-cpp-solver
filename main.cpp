@@ -35,7 +35,7 @@ int main() {
 
         Cell cell = Cell(type, x, y, direction, color);
         devices.push_back(cell);
-        board[x][y] = cell;
+        board[y][x] = cell;
     }
 
     // add lasers and rays
@@ -48,7 +48,7 @@ int main() {
     // print board
     for (int x = 1; x < width; x++) {
         for (int y = 1; y < height; y++) {
-            cout << board[x][y];
+            cout << board[y][x];
         }
         cout << endl;
     }
@@ -90,19 +90,19 @@ void addRays(Cell **board, int width, int height, Cell &laser) {
 pair<short, short> getRaySteps(unsigned short laserDirection) {
     switch (laserDirection) {
         case 0:
-            return make_pair(0, -1);
+            return make_pair(-1, 0);
         case 1:
-            return make_pair(1, -1);
+            return make_pair(-1, 1);
         case 2:
-            return make_pair(1, 0);
+            return make_pair(0, 1);
         case 3:
             return make_pair(1, 1);
         case 4:
-            return make_pair(0, 1);
+            return make_pair(1, 0);
         case 5:
-            return make_pair(-1, 1);
+            return make_pair(1, -1);
         case 6:
-            return make_pair(-1, 0);
+            return make_pair(0, -1);
         case 7:
             return make_pair(-1, -1);
         default:
