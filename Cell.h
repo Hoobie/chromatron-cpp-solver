@@ -9,6 +9,10 @@
 struct ray_type {
     unsigned short direction;
     color_type color;
+
+    bool operator==(ray_type r) {
+        return (direction == r.direction && color == r.color);
+    }
 };
 
 class Cell {
