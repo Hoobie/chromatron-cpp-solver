@@ -29,8 +29,16 @@ unsigned int Cell::getX() {
     return x;
 }
 
+void Cell::setX(unsigned int x) {
+    this->x = x;
+}
+
 unsigned int Cell::getY() {
     return y;
+}
+
+void Cell::setY(unsigned int y) {
+    this->y = y;
 }
 
 color_type Cell::getColor() {
@@ -50,8 +58,45 @@ void Cell::setDirection(unsigned short direction) {
 }
 
 ostream& operator<<(ostream& os, const Cell& c) {
-    os << cellTypeToString(c.type) << ": (" << c.x << ", " << c.y << "), d: " << c.direction <<
-            ", c: " << colorToString(c.color) << endl;
+    if (isBlock(c.type)) {
+        os << "X";
+    }
+    if (isLaser(c.type)) {
+        os << "*";
+    }
+    if (isMirror(c.type)) {
+        os << "()";
+    }
+    if (isPipe(c.type)) {
+        os << "=";
+    }
+    if (isTarget(c.type)) {
+        os << ".";
+    }
+    if (!c.rays.empty()) {
+        switch(c.rays[0].direction) {
+            case 0:
+            case 4:
+                os << "-";
+                break;
+            case 1:
+            case 5:
+                os << "/";
+                break;
+            case 2:
+            case 6:
+                os << "|";
+                break;
+            case 3:
+            case 7:
+                os << "\\";
+                break;
+            default:
+                os << "R";
+        }
+    } else if (c.type == NONE) {
+        os << ".";
+    }
     return os;
 }
 

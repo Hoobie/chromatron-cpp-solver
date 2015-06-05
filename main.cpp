@@ -34,9 +34,8 @@ int main() {
         cin >> type >> x >> y >> direction >> color;
 
         Cell cell = Cell(type, x, y, direction, color);
-        devices.push_back(board[x][y]);
+        devices.push_back(cell);
         board[x][y] = cell;
-        cout << board[x][y];
     }
 
     // add lasers and rays
@@ -45,6 +44,15 @@ int main() {
             addRays(board, width, height, dev);
         }
     }
+
+    // print board
+    for (int x = 1; x < width; x++) {
+        for (int y = 1; y < height; y++) {
+            cout << board[x][y];
+        }
+        cout << endl;
+    }
+
 
     // TODO: move mirrors
 
@@ -60,7 +68,7 @@ int main() {
 void addRays(Cell **board, int width, int height, Cell &laser) {
     pair<short, short> steps = getRaySteps(laser.getDirection());
     for (pair<unsigned int, unsigned int> i(laser.getX() + steps.first, laser.getY() + steps.second);
-         i.first > 0, i.first < width, i.second > 0, i.second < height; i.first + steps.first, i.second + steps.second) {
+         i.first > 0 && i.first < width && i.second > 0 && i.second < height; i.first += steps.first, i.second += steps.second) {
         Cell &cell = board[i.first][i.second];
         if (isBlock(cell.getCellType())) {
             break;
@@ -71,6 +79,10 @@ void addRays(Cell **board, int width, int height, Cell &laser) {
                 break;
             }
         }
+        cell.setX(i.first);
+        cell.setY(i.second);
+        cell.setDirection(laser.getDirection());
+        cell.setColor(laser.getColor());
         cell.addRay(ray);
     }
 }
@@ -78,19 +90,19 @@ void addRays(Cell **board, int width, int height, Cell &laser) {
 pair<short, short> getRaySteps(unsigned short laserDirection) {
     switch (laserDirection) {
         case 0:
-            return make_pair(-1, 0);
+            return make_pair(0, -1);
         case 1:
-            return make_pair(-1, 1);
+            return make_pair(1, -1);
         case 2:
-            return make_pair(0, 1);
+            return make_pair(1, 0);
         case 3:
             return make_pair(1, 1);
         case 4:
-            return make_pair(1, 0);
+            return make_pair(0, 1);
         case 5:
-            return make_pair(1, -1);
+            return make_pair(-1, 1);
         case 6:
-            return make_pair(0, -1);
+            return make_pair(-1, 0);
         case 7:
             return make_pair(-1, -1);
         default:
