@@ -7,7 +7,7 @@
 void changeRays(vector<vector<Cell>> &board, int width, int height, Cell &device, bool remove);
 pair<short, short> getRaySteps(unsigned short direction);
 unsigned short laserToPipeDirection(unsigned short laserDirection);
-bool solve(vector<vector<Cell>> board, int width, int height, vector<Cell> mirrors);
+bool solve(vector<vector<Cell>> &board, int width, int height, vector<Cell> &mirrors);
 void printBoard(vector<vector<Cell>> board, int width, int height);
 void prepareBoardCopy(vector<vector<Cell>> &boardCopy, int width, int height, vector<Cell> &mirrorsCopy, unsigned int x,
                       unsigned int y, unsigned short mirrorDirection);
@@ -71,7 +71,7 @@ void printBoard(vector<vector<Cell>> board, int width, int height) {
     }
 }
 
-bool solve(vector<vector<Cell>> board, int width, int height, vector<Cell> mirrors) {
+bool solve(vector<vector<Cell>> &board, int width, int height, vector<Cell> &mirrors) {
     if (isBoardCompleted(board, width, height)) {
         cout << endl << "completed!" << endl;
         printBoard(board, width, height);
@@ -178,8 +178,8 @@ bool solve(vector<vector<Cell>> board, int width, int height, vector<Cell> mirro
     return false;
 }
 
-void prepareBoardCopy(vector<vector<Cell>> &boardCopy, int width, int height, vector<Cell> &mirrorsCopy, unsigned int y,
-                      unsigned int x, unsigned short mirrorDirection) {
+void prepareBoardCopy(vector<vector<Cell>> &boardCopy, int width, int height, vector<Cell> &mirrorsCopy, unsigned int x,
+                      unsigned int y, unsigned short mirrorDirection) {
     Cell &cell = boardCopy[x][y];
 
     unsigned short direction = cell.getDirection();
@@ -206,11 +206,15 @@ void changeRays(vector<vector<Cell>> &board, int width, int height, Cell &device
 
     for (pair<unsigned int, unsigned int> i(device.getX() + steps.first, device.getY() + steps.second);
          i.first > 0 && i.first < width && i.second > 0 && i.second < height; i.first += steps.first, i.second += steps.second) {
+
         Cell &cell = board[i.first][i.second];
+
         if (isBlock(cell.getCellType())) {
             break;
         }
+
         const ray_type &ray = { device.getDirection(), device.getColor() };
+
         vector<ray_type> rays = cell.getRays();
         const vector<::ray_type>::iterator &iterator = find(rays.begin(), rays.end(), ray);
         if (iterator != rays.end()) {
@@ -219,11 +223,13 @@ void changeRays(vector<vector<Cell>> &board, int width, int height, Cell &device
             }
             break;
         }
+
         if (isPipe(cell.getCellType())) {
             if (cell.getDirection() != laserToPipeDirection(device.getDirection())) {
                 break;
             }
         }
+
         if (isMirror(cell.getCellType())) {
             // create pseudo-laser with proper reflection direction
             unsigned short direction = getReflectionDirection(cell.getCellType(), cell.getDirection(), device.getDirection());
@@ -234,9 +240,19 @@ void changeRays(vector<vector<Cell>> &board, int width, int height, Cell &device
                 break;
             }
         }
+
         cell.setX(i.first);
         cell.setY(i.second);
         cell.addRay(ray);
+        cell.setDirection(device.getDirection());
+
+        rays = cell.getRays();
+        color_type colorSum = BLANK;
+        for (auto r : rays) {
+            colorSum += r.color;
+        }
+        cell.setColor(colorSum);
+
         if (isTarget(cell.getCellType())) {
             break;
         }
