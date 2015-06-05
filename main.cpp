@@ -9,7 +9,7 @@ pair<short, short> getRaySteps(unsigned short direction);
 unsigned short laserToPipeDirection(unsigned short laserDirection);
 bool solve(vector<vector<Cell>> board, int width, int height, vector<Cell> mirrors);
 void printBoard(vector<vector<Cell>> board, int width, int height);
-void prepareBoardCopy(vector<vector<Cell>> &boardCopy, vector<Cell> mirrorsCopy, unsigned int x, unsigned int y,
+void prepareBoardCopy(vector<vector<Cell>> &boardCopy, vector<Cell> &mirrorsCopy, unsigned int x, unsigned int y,
                       unsigned short mirrorDirection);
 
 unsigned short getReflectionDirection(cell_type mirror_type, unsigned short mirrorDirection,
@@ -176,7 +176,7 @@ bool solve(vector<vector<Cell>> board, int width, int height, vector<Cell> mirro
     return NULL;
 }
 
-void prepareBoardCopy(vector<vector<Cell>> &boardCopy, vector<Cell> mirrorsCopy, unsigned int y, unsigned int x,
+void prepareBoardCopy(vector<vector<Cell>> &boardCopy, vector<Cell> &mirrorsCopy, unsigned int y, unsigned int x,
                       unsigned short mirrorDirection) {
     color_type color = boardCopy[x][y].getColor();
     Cell m = mirrorsCopy.back();
