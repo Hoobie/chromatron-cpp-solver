@@ -1,5 +1,4 @@
 #include <iostream>
-#include <string>
 #include <vector>
 #include <algorithm>
 
@@ -282,22 +281,21 @@ vector<ray_type> & Cell::getRays() {
 
 // ============================================== DECLARATIONS =========================================================
 
-void changeRays(vector<vector<Cell>> &board, int width, int height, Cell &device, bool remove);
+void changeRays(vector<vector<Cell>> &board, unsigned int width, unsigned int height, Cell &device, bool remove);
 pair<short, short> getRaySteps(unsigned short direction);
 unsigned short laserToPipeDirection(unsigned short laserDirection);
-bool solve(vector<vector<Cell>> &board, int width, int height, vector<Cell> &mirrors);
-void printBoard(vector<vector<Cell>> board, int width, int height);
-void prepareBoardCopy(vector<vector<Cell>> &boardCopy, int width, int height, vector<Cell> &mirrorsCopy, unsigned int x,
-                      unsigned int y, unsigned short mirrorDirection);
+bool solve(vector<vector<Cell>> &board, unsigned int width, unsigned int height, vector<Cell> &mirrors);
+void printBoard(vector<vector<Cell>> board, unsigned int width, unsigned int height);
+void prepareBoardCopy(vector<vector<Cell>> &boardCopy, unsigned int width, unsigned int height, vector<Cell> &mirrorsCopy,
+                      unsigned int x, unsigned int y, unsigned short mirrorDirection);
 unsigned short getReflectionDirection(cell_type mirror_type, unsigned short mirrorDirection,
                                       unsigned short rayDirection);
-bool isBoardCompleted(vector<vector<Cell>> board, int width, int height);
+bool isBoardCompleted(vector<vector<Cell>> board, unsigned int width, unsigned int height);
 
 unsigned int width, height, devicesCount = 0;
 
 int main() {
 
-    width, height, devicesCount = 0;
     vector<Cell> devices;
     vector<Cell> mirrors;
 
@@ -308,7 +306,7 @@ int main() {
 
     vector<vector<Cell>> board(width, vector<Cell>(height));
 
-    for (int i = 0; i < devicesCount; i++) {
+    for (unsigned int i = 0; i < devicesCount; i++) {
         string type, color;
         unsigned int x, y = 0;
         unsigned short direction = 0;
@@ -338,11 +336,11 @@ int main() {
     return 0;
 }
 
-void printBoard(vector<vector<Cell>> board, int width, int height) {
+void printBoard(vector<vector<Cell>> board, unsigned int width, unsigned int height) {
     cout << width - 1 << " " << height - 1 << endl;
     cout << devicesCount << endl;
-    for (int y = 1; y < height; y++) {
-        for (int x = 1; x < width; x++) {
+    for (unsigned int y = 1; y < height; y++) {
+        for (unsigned int x = 1; x < width; x++) {
             Cell cell = board[x][y];
             cell_type type = cell.getCellType();
             if (isMirror(type)) {
@@ -369,15 +367,15 @@ void printBoard(vector<vector<Cell>> board, int width, int height) {
     }
 
     if (DEBUG) {
-        for (int y = 1; y < height; y++) {
-            for (int x = 1; x < width; x++) {
+        for (unsigned int y = 1; y < height; y++) {
+            for (unsigned int x = 1; x < width; x++) {
                 cout << board[x][y];
             }
         }
     }
 }
 
-bool solve(vector<vector<Cell>> &board, int width, int height, vector<Cell> &mirrors) {
+bool solve(vector<vector<Cell>> &board, unsigned int width, unsigned int height, vector<Cell> &mirrors) {
     if (isBoardCompleted(board, width, height)) {
         printBoard(board, width, height);
         return true;
@@ -482,8 +480,8 @@ bool solve(vector<vector<Cell>> &board, int width, int height, vector<Cell> &mir
     return false;
 }
 
-void prepareBoardCopy(vector<vector<Cell>> &boardCopy, int width, int height, vector<Cell> &mirrorsCopy, unsigned int x,
-                      unsigned int y, unsigned short mirrorDirection) {
+void prepareBoardCopy(vector<vector<Cell>> &boardCopy, unsigned int width, unsigned int height,
+                      vector<Cell> &mirrorsCopy, unsigned int x, unsigned int y, unsigned short mirrorDirection) {
     Cell &cell = boardCopy[x][y];
 
     unsigned short direction = cell.getDirection();
@@ -501,7 +499,7 @@ void prepareBoardCopy(vector<vector<Cell>> &boardCopy, int width, int height, ve
     changeRays(boardCopy, width, height, cell, false);
 }
 
-void changeRays(vector<vector<Cell>> &board, int width, int height, Cell &device, bool remove) {
+void changeRays(vector<vector<Cell>> &board, unsigned int width, unsigned int height, Cell &device, bool remove) {
     pair<short, short> steps = getRaySteps(device.getDirection());
 
     if (steps.first == 0 && steps.second == 0) {
@@ -653,7 +651,7 @@ unsigned short laserToPipeDirection(unsigned short laserDirection) {
     }
 }
 
-bool isBoardCompleted(vector<vector<Cell>> board, int width, int height) {
+bool isBoardCompleted(vector<vector<Cell>> board, unsigned int width, unsigned int height) {
     for (unsigned int y = 1; y < height; y++) {
         for (unsigned int x = 1; x < width; x++) {
             Cell cell = board[x][y];
