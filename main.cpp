@@ -4,7 +4,7 @@
 #include "cell_type.h"
 #include "Cell.h"
 
-void addRays(vector<vector<Cell>> board, int width, int height, Cell &device);
+void addRays(vector<vector<Cell>> &board, int width, int height, Cell &device);
 pair<short, short> getRaySteps(unsigned short direction);
 unsigned short laserToPipeDirection(unsigned short laserDirection);
 bool solve(vector<vector<Cell>> board, int width, int height, vector<Cell> mirrors);
@@ -188,7 +188,7 @@ void prepareBoardCopy(vector<vector<Cell>> &boardCopy, vector<Cell> mirrorsCopy,
     // TODO: remove wrong and add new rays
 }
 
-void addRays(vector<vector<Cell>> board, int width, int height, Cell &device) {
+void addRays(vector<vector<Cell>> &board, int width, int height, Cell &device) {
     pair<short, short> steps = getRaySteps(device.getDirection());
 
     if (steps.first == 0 && steps.second == 0) {
