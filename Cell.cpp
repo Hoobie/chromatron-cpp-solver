@@ -103,3 +103,7 @@ ostream& operator<<(ostream& os, const Cell& c) {
 void Cell::addRay(ray_type ray) {
     rays.push_back(ray);
 }
+
+vector<ray_type> Cell::getRays() {
+    return rays;
+}

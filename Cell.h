@@ -30,6 +30,7 @@ public:
     Cell();
     Cell(cell_type type, unsigned int x, unsigned int y, unsigned short direction, color_type color);
     Cell(string type, unsigned int x, unsigned int y, unsigned short direction, string color);
+    Cell clone() const { return Cell(*this); }
     cell_type getCellType();
     void setType(cell_type type);
     unsigned int getX();
@@ -42,6 +43,7 @@ public:
     void setDirection(unsigned short direction);
     friend ostream& operator<<(ostream& os, const Cell& c);
     void addRay(ray_type ray);
+    vector<ray_type> getRays();
 };
 
 
