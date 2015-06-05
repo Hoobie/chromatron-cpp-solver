@@ -273,7 +273,6 @@ unsigned short getReflectionDirection(cell_type mirror_type, unsigned short mirr
             }
         case LK:
             throw "Not implemented yet!!!";
-            break;
         default:
             throw 2;
     }
