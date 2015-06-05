@@ -97,7 +97,7 @@ ostream& operator<<(ostream& os, const Cell& c) {
                 os << "\\";
                 break;
             default:
-                os << "R";
+                os << ".";
         }
         return os;
     } else if (c.type == NONE) {
