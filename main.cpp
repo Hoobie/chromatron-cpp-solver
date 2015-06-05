@@ -35,7 +35,7 @@ int main() {
 
         Cell cell = Cell(type, x, y, direction, color);
         devices.push_back(cell);
-        board[y][x] = cell;
+        board[x][y] = cell;
     }
 
     // add lasers and rays
@@ -46,9 +46,9 @@ int main() {
     }
 
     // print board
-    for (int x = 1; x < width; x++) {
-        for (int y = 1; y < height; y++) {
-            cout << board[y][x];
+    for (int y = 1; y < height; y++) {
+        for (int x = 1; x < width; x++) {
+            cout << board[x][y];
         }
         cout << endl;
     }
