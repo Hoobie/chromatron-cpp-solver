@@ -267,7 +267,7 @@ ostream& operator<<(ostream& os, const Cell& c) {
                 os << ".";
         }
         return os;
-    } else if (c.type == NONE) {
+    } else if (c.type == NONE || c.type == VISITED) {
         os << ".";
         return os;
     }
@@ -394,7 +394,7 @@ bool solve(vector<vector<Cell>> &board, unsigned int width, unsigned int height,
     for (unsigned int y = 1; y < height; y++) {
         for (unsigned int x = 1; x < width; x++) {
             Cell &cell = board[x][y];
-            if (!cell.getRays().empty() && cell.getCellType() != VISITED) {
+            if (!cell.getRays().empty() && cell.getCellType() == NONE) {
                 for (auto &mirror : mirrors) {
                     try {
                         if (mirror.getCellType() == LP) {
@@ -524,11 +524,12 @@ void changeRays(vector<vector<Cell>> &board, unsigned int width, unsigned int he
 
         Cell &cell = board[i.first][i.second];
 
-        if (isBlock(cell.getCellType())) {
+        cell_type cellType = cell.getCellType();
+        if (isBlock(cellType) || isLaser(cellType)) {
             break;
         }
 
-        const ray_type &ray = { device.getDirection(), device.getColor() };
+        ray_type ray = { device.getDirection(), device.getColor() };
 
         vector<ray_type> &rays = cell.getRays();
         const vector<ray_type>::iterator &iterator = find(rays.begin(), rays.end(), ray);
@@ -536,22 +537,25 @@ void changeRays(vector<vector<Cell>> &board, unsigned int width, unsigned int he
             if (remove) {
                 rays.erase(iterator);
             }
+            if (isTarget(cellType)) {
+                break;
+            }
             continue;
         }
 
-        if (isPipe(cell.getCellType())) {
+        if (isPipe(cellType)) {
             if (cell.getDirection() != laserToPipeDirection(device.getDirection())) {
                 break;
             }
         }
 
-        if (isMirror(cell.getCellType())) {
+        if (isMirror(cellType)) {
             // create pseudo-laser with proper reflection direction
-            unsigned short direction = getReflectionDirection(cell.getCellType(), cell.getDirection(), device.getDirection());
+            unsigned short direction = getReflectionDirection(cellType, cell.getDirection(), device.getDirection());
             Cell pseudoLaser = Cell(NONE, i.first, i.second, direction, device.getColor());
             changeRays(board, width, height, pseudoLaser, remove);
             // if not splitter then only one ray
-            if (cell.getCellType() != LP) {
+            if (cellType != LP) {
                 break;
             }
         }
@@ -568,7 +572,7 @@ void changeRays(vector<vector<Cell>> &board, unsigned int width, unsigned int he
         }
         cell.setColor(colorSum);
 
-        if (isTarget(cell.getCellType())) {
+        if (isTarget(cellType)) {
             break;
         }
     }
