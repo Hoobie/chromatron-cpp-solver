@@ -2,7 +2,7 @@
 #include <vector>
 #include <algorithm>
 
-#define DEBUG true
+#define DEBUG false
 
 using namespace std;
 
@@ -504,12 +504,17 @@ void prepareBoardCopy(vector<vector<Cell>> &boardCopy, unsigned int width, unsig
 
     Cell m = mirrorsCopy.back();
     mirrorsCopy.pop_back();
+
+    // set temporary direction for reflecting
     m.setDirection(getReflectionDirection(m.getCellType(), mirrorDirection, direction));
     m.setX(x);
     m.setY(y);
     m.setColor(color);
     cell = m;
     changeRays(boardCopy, width, height, cell, false);
+
+    // restore direction
+    cell.setDirection(mirrorDirection);
 }
 
 void changeRays(vector<vector<Cell>> &board, unsigned int width, unsigned int height, Cell &device, bool remove) {
@@ -606,7 +611,7 @@ unsigned short getReflectionDirection(cell_type mirror_type, unsigned short mirr
                     return 8;
                 case 5:
                     if (rayDirection == 0) return 6;
-                    if (rayDirection == 2) return 5;
+                    if (rayDirection == 2) return 4;
                     return 8;
                 case 6:
                     if (rayDirection == 1) return 7;
