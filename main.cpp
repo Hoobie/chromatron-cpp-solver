@@ -2,7 +2,7 @@
 #include <vector>
 #include <algorithm>
 
-#define DEBUG false
+#define DEBUG true
 
 using namespace std;
 
@@ -284,7 +284,7 @@ vector<ray_type> & Cell::getRays() {
 
 // ============================================== DECLARATIONS =========================================================
 
-void changeRays(vector<vector<Cell>> &board, unsigned int width, unsigned int height, Cell &device, bool remove);
+void changeRays(vector<vector<Cell>> &board, unsigned int width, unsigned int height, Cell &laser, bool remove);
 pair<short, short> getRaySteps(unsigned short direction);
 unsigned short laserToPipeDirection(unsigned short laserDirection);
 bool solve(vector<vector<Cell>> &board, unsigned int width, unsigned int height, vector<Cell> &mirrors);
@@ -498,6 +498,7 @@ void prepareBoardCopy(vector<vector<Cell>> &boardCopy, unsigned int width, unsig
     Cell &cell = boardCopy[x][y];
 
     unsigned short direction = cell.getDirection();
+    // TODO: handle more colors
     color_type color = cell.getColor();
 
     changeRays(boardCopy, width, height, cell, true);
@@ -513,28 +514,29 @@ void prepareBoardCopy(vector<vector<Cell>> &boardCopy, unsigned int width, unsig
     cell = m;
     changeRays(boardCopy, width, height, cell, false);
 
-    // restore direction
+    // restore mirror direction
     cell.setDirection(mirrorDirection);
 }
 
-void changeRays(vector<vector<Cell>> &board, unsigned int width, unsigned int height, Cell &device, bool remove) {
-    pair<short, short> steps = getRaySteps(device.getDirection());
+void changeRays(vector<vector<Cell>> &board, unsigned int width, unsigned int height, Cell &laser, bool remove) {
+
+    pair<short, short> steps = getRaySteps(laser.getDirection());
 
     if (steps.first == 0 && steps.second == 0) {
         return;
     }
 
-    for (pair<unsigned int, unsigned int> i(device.getX() + steps.first, device.getY() + steps.second);
+    for (pair<unsigned int, unsigned int> i(laser.getX() + steps.first, laser.getY() + steps.second);
          i.first > 0 && i.first < width && i.second > 0 && i.second < height; i.first += steps.first, i.second += steps.second) {
 
         Cell &cell = board[i.first][i.second];
-
         cell_type cellType = cell.getCellType();
+
         if (isBlock(cellType) || isLaser(cellType)) {
             break;
         }
 
-        ray_type ray = { device.getDirection(), device.getColor() };
+        ray_type ray = { laser.getDirection(), laser.getColor() };
 
         vector<ray_type> &rays = cell.getRays();
         const vector<ray_type>::iterator &iterator = find(rays.begin(), rays.end(), ray);
@@ -549,15 +551,15 @@ void changeRays(vector<vector<Cell>> &board, unsigned int width, unsigned int he
         }
 
         if (isPipe(cellType)) {
-            if (cell.getDirection() != laserToPipeDirection(device.getDirection())) {
+            if (cell.getDirection() != laserToPipeDirection(laser.getDirection())) {
                 break;
             }
         }
 
         if (isMirror(cellType)) {
             // create pseudo-laser with proper reflection direction
-            unsigned short direction = getReflectionDirection(cellType, cell.getDirection(), device.getDirection());
-            Cell pseudoLaser = Cell(NONE, i.first, i.second, direction, device.getColor());
+            unsigned short direction = getReflectionDirection(cellType, cell.getDirection(), laser.getDirection());
+            Cell pseudoLaser = Cell(NONE, i.first, i.second, direction, laser.getColor());
             changeRays(board, width, height, pseudoLaser, remove);
             // if not splitter then only one ray
             if (cellType != LP) {
@@ -568,7 +570,7 @@ void changeRays(vector<vector<Cell>> &board, unsigned int width, unsigned int he
         cell.setX(i.first);
         cell.setY(i.second);
         cell.addRay(ray);
-        cell.setDirection(device.getDirection());
+        cell.setDirection(laser.getDirection());
 
         rays = cell.getRays();
         color_type colorSum = BLANK;
