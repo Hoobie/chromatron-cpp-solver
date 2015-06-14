@@ -305,7 +305,7 @@ vector<ray_type> & Cell::getRays() {
 
 // ============================================== DECLARATIONS =========================================================
 
-void changeRays(vector<vector<Cell>> &board, unsigned int width, unsigned int height, Cell &laser, bool remove);
+void emitRay(vector<vector<Cell>> &board, unsigned int width, unsigned int height, Cell &laser, bool remove);
 pair<short, short> getRaySteps(unsigned short direction);
 unsigned short laserToPipeDirection(unsigned short laserDirection);
 bool solve(vector<vector<Cell>> &board, unsigned int width, unsigned int height, vector<Cell> &mirrors);
@@ -346,7 +346,7 @@ int main() {
     // add lasers and rays, gather mirrors
     for (auto &dev : devices) {
         if (isLaser(dev.getCellType())) {
-            changeRays(board, width, height, dev, false);
+            emitRay(board, width, height, dev, false);
         }
         if (isMirror(dev.getCellType())) {
             mirrors.push_back(dev);
@@ -524,7 +524,7 @@ void putMirror(vector<vector<Cell>> &boardCopy, unsigned int width, unsigned int
 
     for (auto ray : cell.getRays()) {
         Cell tmpCell = Cell(NONE, x, y, ray.direction, ray.color);
-        changeRays(boardCopy, width, height, tmpCell, true);
+        emitRay(boardCopy, width, height, tmpCell, true);
 
         m.addRay(ray);
     }
@@ -546,11 +546,11 @@ void reflectRays(vector<vector<Cell>> &board, unsigned int width, unsigned int h
             break;
         }
         Cell tmpLaser = Cell(NONE, mirror.getX(), mirror.getY(), reflectionDirection, ray.color);
-        changeRays(board, width, height, tmpLaser, remove);
+        emitRay(board, width, height, tmpLaser, remove);
     }
 }
 
-void changeRays(vector<vector<Cell>> &board, unsigned int width, unsigned int height, Cell &laser, bool remove) {
+void emitRay(vector<vector<Cell>> &board, unsigned int width, unsigned int height, Cell &laser, bool remove) {
 
     pair<short, short> steps = getRaySteps(laser.getDirection());
 
