@@ -2,7 +2,7 @@
 #include <vector>
 #include <algorithm>
 
-#define DEBUG true
+#define DEBUG false
 
 using namespace std;
 
@@ -407,7 +407,7 @@ void printBoard(vector<vector<Cell>> board, unsigned int width, unsigned int hei
 }
 
 bool solve(vector<vector<Cell>> &board, unsigned int width, unsigned int height, vector<Cell> &mirrors) {
-    printBoard(board, width, height, mirrors);
+    //printBoard(board, width, height, mirrors);
     if (isBoardCompleted(board, width, height)) {
         printBoard(board, width, height, mirrors);
         return true;
