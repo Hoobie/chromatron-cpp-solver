@@ -235,9 +235,6 @@ ostream& operator<<(ostream& os, const Cell& c) {
     }
     if (isMirror(c.type)) {
         unsigned short mirrorDirection = c.getDirection();
-        if (c.type == LP) {
-            mirrorDirection += 4;
-        }
         switch(mirrorDirection) {
             case 0:
                 os << ")";
@@ -410,6 +407,7 @@ void printBoard(vector<vector<Cell>> board, unsigned int width, unsigned int hei
 }
 
 bool solve(vector<vector<Cell>> &board, unsigned int width, unsigned int height, vector<Cell> &mirrors) {
+    printBoard(board, width, height, mirrors);
     if (isBoardCompleted(board, width, height)) {
         printBoard(board, width, height, mirrors);
         return true;
@@ -547,7 +545,8 @@ void reflectRays(vector<vector<Cell>> &board, unsigned int width, unsigned int h
 
         unsigned short reflectionDirection;
         try {
-            reflectionDirection = getReflectionDirection(mirrorType, mirror.getDirection(), ray.direction);
+            unsigned short mirrorDirection = mirror.getDirection();
+            reflectionDirection = getReflectionDirection(mirrorType, mirrorDirection, ray.direction);
         } catch (int ex) {
             break;
         }
@@ -611,8 +610,6 @@ unsigned short getReflectionDirection(cell_type mirror_type, unsigned short mirr
                                       unsigned short rayDirection) {
     switch (mirror_type) {
         case LU:
-        case LP:
-            mirrorDirection += 4;
             switch (mirrorDirection) {
                 case 0:
                     if (rayDirection == 3) return 1;
@@ -643,6 +640,35 @@ unsigned short getReflectionDirection(cell_type mirror_type, unsigned short mirr
                     if (rayDirection == 3) return 5;
                     throw 3;
                 case 7:
+                    if (rayDirection == 2) return 0;
+                    if (rayDirection == 4) return 6;
+                    throw 3;
+                default:
+                    throw 4;
+            }
+        case LP:
+            switch (mirrorDirection) {
+                case 0:
+                    if (rayDirection == 3) return 1;
+                    if (rayDirection == 5) return 7;
+                    if (rayDirection == 1) return 3;
+                    if (rayDirection == 7) return 5;
+                    throw 3;
+                case 1:
+                    if (rayDirection == 4) return 2;
+                    if (rayDirection == 6) return 0;
+                    if (rayDirection == 0) return 6;
+                    if (rayDirection == 2) return 4;
+                    throw 3;
+                case 2:
+                    if (rayDirection == 5) return 3;
+                    if (rayDirection == 7) return 1;
+                    if (rayDirection == 1) return 7;
+                    if (rayDirection == 3) return 5;
+                    throw 3;
+                case 3:
+                    if (rayDirection == 0) return 2;
+                    if (rayDirection == 6) return 4;
                     if (rayDirection == 2) return 0;
                     if (rayDirection == 4) return 6;
                     throw 3;
