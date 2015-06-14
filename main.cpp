@@ -234,7 +234,11 @@ ostream& operator<<(ostream& os, const Cell& c) {
         return os;
     }
     if (isMirror(c.type)) {
-        switch(c.getDirection()) {
+        unsigned short mirrorDirection = c.getDirection();
+        if (c.type == LP) {
+            mirrorDirection += 4;
+        }
+        switch(mirrorDirection) {
             case 0:
                 os << ")";
                 break;
@@ -310,7 +314,7 @@ pair<short, short> getRaySteps(unsigned short direction);
 unsigned short laserToPipeDirection(unsigned short laserDirection);
 bool solve(vector<vector<Cell>> &board, unsigned int width, unsigned int height, vector<Cell> &mirrors);
 void printBoard(vector<vector<Cell>> board, unsigned int width, unsigned int height, vector<Cell> unusedMirrors);
-void putMirror(vector<vector<Cell>> &boardCopy, unsigned int width, unsigned int height, vector<Cell> &mirrorsCopy,
+void putMirror(vector<vector<Cell>> &board, unsigned int width, unsigned int height, vector<Cell> &mirrorsCopy,
                unsigned int x, unsigned int y, unsigned short mirrorDirection);
 unsigned short getReflectionDirection(cell_type mirror_type, unsigned short mirrorDirection,
                                       unsigned short rayDirection);
@@ -515,16 +519,16 @@ bool solve(vector<vector<Cell>> &board, unsigned int width, unsigned int height,
     return false;
 }
 
-void putMirror(vector<vector<Cell>> &boardCopy, unsigned int width, unsigned int height,
+void putMirror(vector<vector<Cell>> &board, unsigned int width, unsigned int height,
                vector<Cell> &mirrorsCopy, unsigned int x, unsigned int y, unsigned short mirrorDirection) {
-    Cell &cell = boardCopy[x][y];
+    Cell &cell = board[x][y];
 
     Cell m = mirrorsCopy.back();
     mirrorsCopy.pop_back();
 
     for (auto ray : cell.getRays()) {
         Cell tmpCell = Cell(NONE, x, y, ray.direction, ray.color);
-        emitRay(boardCopy, width, height, tmpCell, true);
+        emitRay(board, width, height, tmpCell, true);
 
         m.addRay(ray);
     }
@@ -534,19 +538,27 @@ void putMirror(vector<vector<Cell>> &boardCopy, unsigned int width, unsigned int
     m.setY(y);
     cell = m;
 
-    reflectRays(boardCopy, width, height, cell, false);
+    reflectRays(board, width, height, cell, false);
 }
 
 void reflectRays(vector<vector<Cell>> &board, unsigned int width, unsigned int height, Cell &mirror, bool remove) {
     for (auto ray : mirror.getRays()) {
+        cell_type mirrorType = mirror.getCellType();
+
         unsigned short reflectionDirection;
         try {
-            reflectionDirection = getReflectionDirection(mirror.getCellType(), mirror.getDirection(), ray.direction);
+            reflectionDirection = getReflectionDirection(mirrorType, mirror.getDirection(), ray.direction);
         } catch (int ex) {
             break;
         }
+
         Cell tmpLaser = Cell(NONE, mirror.getX(), mirror.getY(), reflectionDirection, ray.color);
         emitRay(board, width, height, tmpLaser, remove);
+
+        if (mirrorType == LP) {
+            Cell tmpLaser2 = Cell(NONE, mirror.getX(), mirror.getY(), ray.direction, ray.color);
+            emitRay(board, width, height, tmpLaser2, remove);
+        }
     }
 }
 
@@ -591,10 +603,6 @@ void emitRay(vector<vector<Cell>> &board, unsigned int width, unsigned int heigh
 
         if (isMirror(cellType)) {
             reflectRays(board, width, height, cell, remove);
-            // if not splitter then only one ray
-            if (cellType != LP) {
-                break;
-            }
         }
     }
 }
@@ -604,6 +612,7 @@ unsigned short getReflectionDirection(cell_type mirror_type, unsigned short mirr
     switch (mirror_type) {
         case LU:
         case LP:
+            mirrorDirection += 4;
             switch (mirrorDirection) {
                 case 0:
                     if (rayDirection == 3) return 1;
