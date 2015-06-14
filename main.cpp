@@ -661,22 +661,22 @@ unsigned short getReflectionDirection(cell_type mirror_type, unsigned short mirr
                     if (rayDirection == 7) return 0;
                     throw 3;
                 case 3:
-                    if (rayDirection == 0) return 4;
-                    if (rayDirection == 5) return 3;
-                    if (rayDirection == 6) return 2;
-                    if (rayDirection == 7) return 1;
-                    throw 3;
-                case 4:
-                    if (rayDirection == 0) return 5;
-                    if (rayDirection == 1) return 4;
+                    if (rayDirection == 0) return 1;
+                    if (rayDirection == 5) return 4;
                     if (rayDirection == 6) return 3;
                     if (rayDirection == 7) return 2;
                     throw 3;
+                case 4:
+                    if (rayDirection == 0) return 3;
+                    if (rayDirection == 1) return 2;
+                    if (rayDirection == 6) return 5;
+                    if (rayDirection == 7) return 4;
+                    throw 3;
                 case 5:
-                    if (rayDirection == 0) return 6;
-                    if (rayDirection == 1) return 5;
-                    if (rayDirection == 2) return 4;
-                    if (rayDirection == 7) return 3;
+                    if (rayDirection == 0) return 5;
+                    if (rayDirection == 1) return 4;
+                    if (rayDirection == 2) return 3;
+                    if (rayDirection == 7) return 6;
                     throw 3;
                 case 6:
                     if (rayDirection == 0) return 7;
