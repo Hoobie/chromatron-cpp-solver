@@ -519,16 +519,13 @@ void putMirror(vector<vector<Cell>> &boardCopy, unsigned int width, unsigned int
                vector<Cell> &mirrorsCopy, unsigned int x, unsigned int y, unsigned short mirrorDirection) {
     Cell &cell = boardCopy[x][y];
 
-    for (auto ray : cell.getRays()) {
-        Cell tmpCell = Cell(NONE, x, y, ray.direction, ray.color);
-        changeRays(boardCopy, width, height, tmpCell, true);
-    }
-
-
     Cell m = mirrorsCopy.back();
     mirrorsCopy.pop_back();
 
     for (auto ray : cell.getRays()) {
+        Cell tmpCell = Cell(NONE, x, y, ray.direction, ray.color);
+        changeRays(boardCopy, width, height, tmpCell, true);
+
         m.addRay(ray);
     }
 
