@@ -2,7 +2,7 @@
 #include <vector>
 #include <algorithm>
 
-#define DEBUG false
+#define DEBUG true
 
 using namespace std;
 
@@ -160,7 +160,7 @@ public:
     unsigned int getY();
     void setY(unsigned int y);
     color_type getColor();
-    unsigned short getDirection();
+    unsigned short getDirection()const;
     void setDirection(unsigned short direction);
     friend ostream& operator<<(ostream& os, const Cell& c);
     void addRay(ray_type ray);
@@ -216,7 +216,7 @@ color_type Cell::getColor() {
     return color;
 }
 
-unsigned short Cell::getDirection() {
+unsigned short Cell::getDirection()const {
     return direction;
 }
 
@@ -226,7 +226,7 @@ void Cell::setDirection(unsigned short direction) {
 
 ostream& operator<<(ostream& os, const Cell& c) {
     if (isBlock(c.type)) {
-        os << "X";
+        os << "B";
         return os;
     }
     if (isLaser(c.type)) {
@@ -234,11 +234,32 @@ ostream& operator<<(ostream& os, const Cell& c) {
         return os;
     }
     if (isMirror(c.type)) {
-        os << ")";
+        switch(c.getDirection()) {
+            case 0:
+                os << ")";
+                break;
+            case 3:
+            case 4:
+                os << "(";
+                break;
+            case 1:
+            case 7:
+                os << ")";
+                break;
+            case 5:
+                os << "(";
+                break;
+            case 2:
+            case 6:
+                os << "=";
+                break;
+            default:
+                os << ".";
+        }
         return os;
     }
     if (isPipe(c.type)) {
-        os << "=";
+        os << "P";
         return os;
     }
     if (isTarget(c.type)) {
@@ -261,7 +282,7 @@ ostream& operator<<(ostream& os, const Cell& c) {
                 break;
             case 3:
             case 7:
-                os << "V";
+                os << "\\";
                 break;
             default:
                 os << ".";
