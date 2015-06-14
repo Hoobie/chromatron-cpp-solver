@@ -2,7 +2,7 @@
 #include <vector>
 #include <algorithm>
 
-#define DEBUG true
+#define DEBUG false
 
 using namespace std;
 
@@ -684,12 +684,6 @@ bool isBoardCompleted(vector<vector<Cell>> board, unsigned int width, unsigned i
                 if (colorSum != cell.getColor()) {
                     return false;
                 }
-                //if (rays.size() > 1) {
-                    for (auto ray : rays) {
-                        cout << colorToString(ray.color) << " + ";
-                    }
-                    cout << " = " << colorToString(colorSum) << endl;
-                //}
             }
         }
     }
