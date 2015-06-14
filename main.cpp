@@ -2,7 +2,7 @@
 #include <vector>
 #include <algorithm>
 
-#define DEBUG false
+#define DEBUG true
 
 using namespace std;
 
@@ -234,8 +234,11 @@ ostream& operator<<(ostream& os, const Cell& c) {
         return os;
     }
     if (isMirror(c.type)) {
-        unsigned short mirrorDirection = c.getDirection();
-        switch(mirrorDirection) {
+        if (c.type == LP) {
+            os << "X";
+            return os;
+        }
+        switch(c.getDirection()) {
             case 0:
                 os << ")";
                 break;
@@ -407,7 +410,7 @@ void printBoard(vector<vector<Cell>> board, unsigned int width, unsigned int hei
 }
 
 bool solve(vector<vector<Cell>> &board, unsigned int width, unsigned int height, vector<Cell> &mirrors) {
-    //printBoard(board, width, height, mirrors);
+    printBoard(board, width, height, mirrors);
     if (isBoardCompleted(board, width, height)) {
         printBoard(board, width, height, mirrors);
         return true;
@@ -447,6 +450,10 @@ bool solve(vector<vector<Cell>> &board, unsigned int width, unsigned int height,
                             putMirror(boardCopy4, width, height, mirrorsCopy4, x, y, 3);
 
                             boardCopy5[x][y].setType(VISITED);
+                            // shuffle mirrors
+                            if (!mirrorsCopy5.empty()) {
+                                rotate(mirrorsCopy5.begin(), mirrorsCopy5.end() - 1, mirrorsCopy5.end());
+                            }
 
                             return solve(boardCopy1, width, height, mirrorsCopy1) ||
                                    solve(boardCopy2, width, height, mirrorsCopy2) ||
@@ -495,6 +502,10 @@ bool solve(vector<vector<Cell>> &board, unsigned int width, unsigned int height,
                             putMirror(boardCopy8, width, height, mirrorsCopy8, x, y, 7);
 
                             boardCopy9[x][y].setType(VISITED);
+                            // shuffle mirrors
+                            if (!mirrorsCopy9.empty()) {
+                                rotate(mirrorsCopy9.begin(), mirrorsCopy9.end() - 1, mirrorsCopy9.end());
+                            }
 
                             return solve(boardCopy1, width, height, mirrorsCopy1) ||
                                    solve(boardCopy2, width, height, mirrorsCopy2) ||
