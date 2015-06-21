@@ -314,7 +314,7 @@ pair<short, short> getRaySteps(unsigned short direction);
 unsigned short laserToPipeDirection(unsigned short laserDirection);
 bool solve(vector<vector<Cell>> &board, unsigned int width, unsigned int height, vector<Cell> &mirrors);
 void printBoard(vector<vector<Cell>> board, unsigned int width, unsigned int height, vector<Cell> unusedMirrors);
-void putMirror(vector<vector<Cell>> &board, unsigned int width, unsigned int height, vector<Cell> &mirrorsCopy,
+void putMirror(vector<vector<Cell>> &board, unsigned int width, unsigned int height, vector<Cell> &mirrors,
                unsigned int x, unsigned int y, unsigned short mirrorDirection);
 unsigned short getReflectionDirection(cell_type mirror_type, unsigned short mirrorDirection,
                                       unsigned short rayDirection);
@@ -369,8 +369,7 @@ void printBoard(vector<vector<Cell>> board, unsigned int width, unsigned int hei
     cout << width - 1 << " " << height - 1 << endl;
     cout << devicesCount << endl;
     for (auto unusedMirror : unusedMirrors) {
-        cout << cellTypeToString(unusedMirror.getCellType()) << " " << unusedMirror.getX() << " " <<
-                unusedMirror.getY() << " " << unusedMirror.getDirection() << " " << 0 << endl;
+        cout << cellTypeToString(unusedMirror.getCellType()) << " 0 0 " << unusedMirror.getDirection() << " 0" << endl;
     }
     for (unsigned int y = 1; y < height; y++) {
         for (unsigned int x = 1; x < width; x++) {
@@ -378,10 +377,10 @@ void printBoard(vector<vector<Cell>> board, unsigned int width, unsigned int hei
             cell_type type = cell.getCellType();
             if (isMirror(type)) {
                 if (cell.getRays().empty()) {
-                    cout << cellTypeToString(type) << " " << 0 << " " << 0 << " " << cell.getDirection() << " " << 0 << endl;
+                    cout << cellTypeToString(type) << " 0 0 " << cell.getDirection() << " 0" << endl;
                     continue;
                 }
-                cout << cellTypeToString(type) << " " << x << " " << y << " " << cell.getDirection() << " " << 0 << endl;
+                cout << cellTypeToString(type) << " " << x << " " << y << " " << cell.getDirection() << " 0" << endl;
                 continue;
             }
             if (isLaser(type)) {
@@ -389,15 +388,15 @@ void printBoard(vector<vector<Cell>> board, unsigned int width, unsigned int hei
                 continue;
             }
             if (isTarget(type)) {
-                cout << cellTypeToString(type) << " " << x << " " << y << " " << 0 << " " << colorToString(cell.getColor()) << endl;
+                cout << cellTypeToString(type) << " " << x << " " << y << " 0 " << colorToString(cell.getColor()) << endl;
                 continue;
             }
             if (isPipe(type)) {
-                cout << cellTypeToString(type) << " " << x << " " << y << " " << cell.getDirection() << " " << 0 << endl;
+                cout << cellTypeToString(type) << " " << x << " " << y << " " << cell.getDirection() << " 0" << endl;
                 continue;
             }
             if (isBlock(type)) {
-                cout << cellTypeToString(type) << " " << x << " " << y << " " << 0 << " " << 0 << endl;
+                cout << cellTypeToString(type) << " " << x << " " << y << " 0 0" << endl;
                 continue;
             }
         }
@@ -534,24 +533,24 @@ bool solve(vector<vector<Cell>> &board, unsigned int width, unsigned int height,
 }
 
 void putMirror(vector<vector<Cell>> &board, unsigned int width, unsigned int height,
-               vector<Cell> &mirrorsCopy, unsigned int x, unsigned int y, unsigned short mirrorDirection) {
+               vector<Cell> &mirrors, unsigned int x, unsigned int y, unsigned short mirrorDirection) {
     Cell &cell = board[x][y];
 
-    Cell m = mirrorsCopy.back();
-    mirrorsCopy.pop_back();
+    Cell mirror = mirrors.back();
+    mirrors.pop_back();
 
     for (auto ray : cell.getRays()) {
         Cell tmpCell = Cell(NONE, x, y, ray.direction, ray.color);
         tmpCell.addRay(ray);
         emitRay(board, width, height, tmpCell, true);
 
-        m.addRay(ray);
+        mirror.addRay(ray);
     }
 
-    m.setDirection(mirrorDirection);
-    m.setX(x);
-    m.setY(y);
-    cell = m;
+    mirror.setDirection(mirrorDirection);
+    mirror.setX(x);
+    mirror.setY(y);
+    cell = mirror;
 
     reflectRays(board, width, height, cell, false);
 }
