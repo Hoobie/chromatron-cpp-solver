@@ -2,7 +2,7 @@
 #include <vector>
 #include <algorithm>
 
-#define DEBUG false
+#define DEBUG true
 
 using namespace std;
 
@@ -262,10 +262,6 @@ ostream& operator<<(ostream& os, const Cell& c) {
         }
         return os;
     }
-    if (isPipe(c.type)) {
-        os << "P";
-        return os;
-    }
     if (isTarget(c.type)) {
         os << "o";
         return os;
@@ -294,6 +290,10 @@ ostream& operator<<(ostream& os, const Cell& c) {
         return os;
     } else if (c.type == NONE || c.type == VISITED) {
         os << ".";
+        return os;
+    }
+    if (isPipe(c.type)) {
+        os << "P";
         return os;
     }
     return os;
@@ -410,11 +410,12 @@ void printBoard(vector<vector<Cell>> board, unsigned int width, unsigned int hei
             }
             cout << endl;
         }
+        cout << endl;
     }
 }
 
 bool solve(vector<vector<Cell>> &board, unsigned int width, unsigned int height, vector<Cell> &mirrors) {
-    //printBoard(board, width, height, mirrors);
+    printBoard(board, width, height, mirrors);
     if (isBoardCompleted(board, width, height)) {
         printBoard(board, width, height, mirrors);
         return true;
@@ -427,7 +428,6 @@ bool solve(vector<vector<Cell>> &board, unsigned int width, unsigned int height,
             Cell &cell = board[x][y];
             if (!cell.getRays().empty() && cell.getCellType() == NONE) {
                 for (auto &mirror : mirrors) {
-                    try {
                         if (mirror.getCellType() == LP) {
                             vector<vector<Cell>> boardCopy1(board);
                             vector<vector<Cell>> boardCopy2(board);
@@ -521,13 +521,14 @@ bool solve(vector<vector<Cell>> &board, unsigned int width, unsigned int height,
                                    solve(boardCopy8, width, height, mirrorsCopy8) ||
                                    solve(boardCopy9, width, height, mirrorsCopy9);
                         }
-                    } catch (int e) {
-                        return false;
-                    }
                 }
 
             }
         }
+    }
+    if (isBoardCompleted(board, width, height)) {
+        printBoard(board, width, height, mirrors);
+        return true;
     }
     return false;
 }
@@ -556,15 +557,17 @@ void putMirror(vector<vector<Cell>> &board, unsigned int width, unsigned int hei
 }
 
 void reflectRays(vector<vector<Cell>> &board, unsigned int width, unsigned int height, Cell &mirror, bool clear) {
+
+    cell_type mirrorType = mirror.getCellType();
+
     for (auto ray : mirror.getRays()) {
-        cell_type mirrorType = mirror.getCellType();
 
         unsigned short reflectionDirection;
         try {
             unsigned short mirrorDirection = mirror.getDirection();
             reflectionDirection = getReflectionDirection(mirrorType, mirrorDirection, ray.direction);
         } catch (int ex) {
-            break;
+            continue;
         }
 
         Cell tmpLaser = Cell(NONE, mirror.getX(), mirror.getY(), reflectionDirection, ray.color);
@@ -597,15 +600,18 @@ void emitRay(vector<vector<Cell>> &board, unsigned int width, unsigned int heigh
             break;
         }
 
-        ray_type ray = { laser.getDirection(), laser.getColor() };
-
         if (isPipe(cellType)) {
-            if (cell.getDirection() != laserToPipeDirection(laser.getDirection())) {
+            try {
+                if (cell.getDirection() != laserToPipeDirection(laser.getDirection())) {
+                    break;
+                }
+            } catch (int ex) {
                 break;
             }
         }
 
         vector<ray_type> &rays = cell.getRays();
+        ray_type ray = { laser.getDirection(), laser.getColor() };
         const vector<ray_type>::iterator &iterator = find(rays.begin(), rays.end(), ray);
 
         if (iterator != rays.end() && !clear) {
@@ -791,7 +797,7 @@ unsigned short laserToPipeDirection(unsigned short laserDirection) {
         case 7:
             return 3;
         default:
-            return 0;
+            throw 5;
     }
 }
 
