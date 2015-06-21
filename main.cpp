@@ -2,7 +2,7 @@
 #include <vector>
 #include <algorithm>
 
-#define DEBUG true
+#define DEBUG false
 
 using namespace std;
 
@@ -377,6 +377,10 @@ void printBoard(vector<vector<Cell>> board, unsigned int width, unsigned int hei
             Cell cell = board[x][y];
             cell_type type = cell.getCellType();
             if (isMirror(type)) {
+                if (cell.getRays().empty()) {
+                    cout << cellTypeToString(type) << " " << 0 << " " << 0 << " " << cell.getDirection() << " " << 0 << endl;
+                    continue;
+                }
                 cout << cellTypeToString(type) << " " << x << " " << y << " " << cell.getDirection() << " " << 0 << endl;
                 continue;
             }
@@ -410,7 +414,7 @@ void printBoard(vector<vector<Cell>> board, unsigned int width, unsigned int hei
 }
 
 bool solve(vector<vector<Cell>> &board, unsigned int width, unsigned int height, vector<Cell> &mirrors) {
-    printBoard(board, width, height, mirrors);
+    //printBoard(board, width, height, mirrors);
     if (isBoardCompleted(board, width, height)) {
         printBoard(board, width, height, mirrors);
         return true;
@@ -537,6 +541,7 @@ void putMirror(vector<vector<Cell>> &board, unsigned int width, unsigned int hei
 
     for (auto ray : cell.getRays()) {
         Cell tmpCell = Cell(NONE, x, y, ray.direction, ray.color);
+        tmpCell.addRay(ray);
         emitRay(board, width, height, tmpCell, true);
 
         m.addRay(ray);
@@ -584,6 +589,8 @@ void emitRay(vector<vector<Cell>> &board, unsigned int width, unsigned int heigh
          i.first > 0 && i.first < width && i.second > 0 && i.second < height; i.first += steps.first, i.second += steps.second) {
 
         Cell &cell = board[i.first][i.second];
+        cell.setX(i.first);
+        cell.setY(i.second);
         cell_type cellType = cell.getCellType();
 
         if (isBlock(cellType) || isLaser(cellType)) {
@@ -592,27 +599,29 @@ void emitRay(vector<vector<Cell>> &board, unsigned int width, unsigned int heigh
 
         ray_type ray = { laser.getDirection(), laser.getColor() };
 
-        vector<ray_type> &rays = cell.getRays();
-        const vector<ray_type>::iterator &iterator = find(rays.begin(), rays.end(), ray);
-        if (iterator != rays.end()) {
-            if (remove) {
-                rays.erase(iterator);
-            }
-            continue;
-        }
-
         if (isPipe(cellType)) {
             if (cell.getDirection() != laserToPipeDirection(laser.getDirection())) {
                 break;
             }
         }
 
-        cell.setX(i.first);
-        cell.setY(i.second);
-        cell.addRay(ray);
+        vector<ray_type> &rays = cell.getRays();
+        const vector<ray_type>::iterator &iterator = find(rays.begin(), rays.end(), ray);
+
+        if (iterator != rays.end() && !remove) {
+            return;
+        } else if (iterator == rays.end() && remove) {
+            break;
+        }
 
         if (isMirror(cellType)) {
             reflectRays(board, width, height, cell, remove);
+        }
+
+        if (iterator != rays.end() && remove) {
+            rays.erase(iterator);
+        } else if (iterator == rays.end() && !remove) {
+            cell.addRay(ray);
         }
     }
 }
