@@ -8,7 +8,7 @@ using namespace std;
 
 // =============================================== CELL TYPE ===========================================================
 
-enum cell_type {ES = 0, LU = 1, LP = 2, LK = 3, RU = 4, TG = 5, BL = 6, NONE = 7, VISITED = 8};
+enum cell_type {ES = 0, LU = 1, LP = 2, LK = 3, RU = 4, TG = 5, BL = 6, NONE = 7};
 
 inline cell_type toCellType(string s);
 inline string cellTypeToString(cell_type dt);
@@ -35,8 +35,6 @@ inline cell_type toCellType(string s) {
     if (s == "BL") return BL;
     // None - default type for rays or empty cells
     if (s == "NONE") return NONE;
-    // VISITED - for marking visited cells
-    if (s == "VISITED") return VISITED;
     return NONE;
 }
 
@@ -50,7 +48,6 @@ inline string cellTypeToString(cell_type dt) {
         case TG: return "TG";
         case BL: return "BL";
         case NONE: return "NONE";
-        case VISITED: return "VISITED";
     }
     return "NONE";
 }
@@ -148,13 +145,15 @@ class Cell {
      */
     unsigned short direction;
     vector<ray_type> rays;
+    bool luMirrorChecked;
+    bool lpMirrorChecked;
+    bool lkMirrorChecked;
 public:
     Cell();
     Cell(cell_type type, unsigned int x, unsigned int y, unsigned short direction, color_type color);
     Cell(string type, unsigned int x, unsigned int y, unsigned short direction, string color);
     Cell copyCell() const { return Cell(*this); }
     cell_type getCellType();
-    void setType(cell_type type);
     unsigned int getX();
     void setX(unsigned int x);
     unsigned int getY();
@@ -165,11 +164,43 @@ public:
     friend ostream& operator<<(ostream& os, const Cell& c);
     void addRay(ray_type ray);
     vector<ray_type> & getRays();
+
+    bool isMirrorChecked(cell_type mirrorType) {
+        switch (mirrorType) {
+            case LU:
+                return luMirrorChecked;
+            case LP:
+                return lpMirrorChecked;
+            case LK:
+                return lkMirrorChecked;
+            default:
+                throw 6;
+        }
+    }
+
+    void setMirrorChecked(cell_type type, bool checked) {
+        switch (type) {
+            case LU:
+                luMirrorChecked = checked;
+                break;
+            case LP:
+                lpMirrorChecked = checked;
+                break;
+            case LK:
+                lkMirrorChecked = checked;
+                break;
+            default:
+                throw 6;
+        }
+    }
 };
 
 Cell::Cell() {
     this->type = NONE;
     this->color = BLANK;
+    this->luMirrorChecked = false;
+    this->lpMirrorChecked = false;
+    this->lkMirrorChecked = false;
 }
 
 Cell::Cell(cell_type type, unsigned int x, unsigned int y, unsigned short direction, color_type color) {
@@ -178,6 +209,9 @@ Cell::Cell(cell_type type, unsigned int x, unsigned int y, unsigned short direct
     this->y = y;
     this->direction = direction;
     this->color = color;
+    this->luMirrorChecked = false;
+    this->lpMirrorChecked = false;
+    this->lkMirrorChecked = false;
 }
 
 Cell::Cell(string type, unsigned int x, unsigned int y, unsigned short direction, string color) {
@@ -186,14 +220,13 @@ Cell::Cell(string type, unsigned int x, unsigned int y, unsigned short direction
     this->y = y;
     this->direction = direction;
     this->color = toColor(color);
+    this->luMirrorChecked = false;
+    this->lpMirrorChecked = false;
+    this->lkMirrorChecked = false;
 }
 
 cell_type Cell::getCellType() {
     return type;
-}
-
-void Cell::setType(cell_type type) {
-    this->type = type;
 }
 
 unsigned int Cell::getX() {
@@ -288,7 +321,7 @@ ostream& operator<<(ostream& os, const Cell& c) {
                 os << ".";
         }
         return os;
-    } else if (c.type == NONE || c.type == VISITED) {
+    } else if (c.type == NONE) {
         os << ".";
         return os;
     }
@@ -314,8 +347,8 @@ pair<short, short> getRaySteps(unsigned short direction);
 unsigned short laserToPipeDirection(unsigned short laserDirection);
 bool solve(vector<vector<Cell>> &board, unsigned int width, unsigned int height, vector<Cell> &mirrors);
 void printBoard(vector<vector<Cell>> board, unsigned int width, unsigned int height, vector<Cell> unusedMirrors);
-void putMirror(vector<vector<Cell>> &board, unsigned int width, unsigned int height, vector<Cell> &mirrors,
-               unsigned int x, unsigned int y, unsigned short mirrorDirection);
+void putMirror(vector<vector<Cell>> &board, unsigned int width, unsigned int height, unsigned int x, unsigned int y,
+               Cell &mirror, unsigned short mirrorDirection);
 unsigned short getReflectionDirection(cell_type mirror_type, unsigned short mirrorDirection,
                                       unsigned short rayDirection);
 bool isBoardCompleted(vector<vector<Cell>> board, unsigned int width, unsigned int height);
@@ -343,6 +376,9 @@ int main() {
         cin >> type >> x >> y >> direction >> color;
 
         Cell cell = Cell(type, x, y, direction, color);
+        if (isMirror(cell.getCellType())) {
+            cell.setMirrorChecked(cell.getCellType(), true);
+        }
         devices.push_back(cell);
         board[x][y] = cell;
     }
@@ -426,7 +462,27 @@ bool solve(vector<vector<Cell>> &board, unsigned int width, unsigned int height,
         for (unsigned int x = 1; x < width; x++) {
             Cell &cell = board[x][y];
             if (!cell.getRays().empty() && cell.getCellType() == NONE) {
+                bool fullyChecked = true;
                 for (auto &mirror : mirrors) {
+                    if (!cell.isMirrorChecked(mirror.getCellType())) {
+                        fullyChecked = false;
+                    }
+                }
+                if (fullyChecked) continue;
+                for (auto &mirror : mirrors) {
+
+                        vector<Cell> mirrorsCopy(mirrors);
+
+                        Cell mirrorToPut = mirrors.back().copyCell();
+                        mirrorsCopy.pop_back();
+
+                        bool notPartiallyChecked = true;
+                        if (cell.isMirrorChecked(mirrorToPut.getCellType())) {
+                            notPartiallyChecked = false;
+                        } else {
+                            cell.setMirrorChecked(mirrorToPut.getCellType(), true);
+                        }
+
                         if (mirror.getCellType() == LP) {
                             vector<vector<Cell>> boardCopy1(board);
                             vector<vector<Cell>> boardCopy2(board);
@@ -439,29 +495,30 @@ bool solve(vector<vector<Cell>> &board, unsigned int width, unsigned int height,
                             vector<Cell> mirrorsCopy3;
                             vector<Cell> mirrorsCopy4;
                             vector<Cell> mirrorsCopy5;
-                            for (auto &m : mirrors) {
+                            for (auto &m : mirrorsCopy) {
                                 mirrorsCopy1.push_back(m.copyCell());
                                 mirrorsCopy2.push_back(m.copyCell());
                                 mirrorsCopy3.push_back(m.copyCell());
                                 mirrorsCopy4.push_back(m.copyCell());
                                 mirrorsCopy5.push_back(m.copyCell());
                             }
+                            mirrorsCopy5.push_back(mirrorToPut.copyCell());
 
-                            putMirror(boardCopy1, width, height, mirrorsCopy1, x, y, 0);
-                            putMirror(boardCopy2, width, height, mirrorsCopy2, x, y, 1);
-                            putMirror(boardCopy3, width, height, mirrorsCopy3, x, y, 2);
-                            putMirror(boardCopy4, width, height, mirrorsCopy4, x, y, 3);
+                            putMirror(boardCopy1, width, height, x, y, mirrorToPut, 0);
+                            putMirror(boardCopy2, width, height, x, y, mirrorToPut, 1);
+                            putMirror(boardCopy3, width, height, x, y, mirrorToPut, 2);
+                            putMirror(boardCopy4, width, height, x, y, mirrorToPut, 3);
 
-                            boardCopy5[x][y].setType(VISITED);
+                            cell.setMirrorChecked(mirrorToPut.getCellType(), true);
                             // shuffle mirrors
-                            if (!mirrorsCopy5.empty()) {
-                                rotate(mirrorsCopy5.begin(), mirrorsCopy5.end() - 1, mirrorsCopy5.end());
-                            }
+//                            if (!mirrorsCopy5.empty()) {
+//                                rotate(mirrorsCopy5.begin(), mirrorsCopy5.end() - 1, mirrorsCopy5.end());
+//                            }
 
-                            return solve(boardCopy1, width, height, mirrorsCopy1) ||
+                            return (notPartiallyChecked ? (solve(boardCopy1, width, height, mirrorsCopy1) ||
                                    solve(boardCopy2, width, height, mirrorsCopy2) ||
                                    solve(boardCopy3, width, height, mirrorsCopy3) ||
-                                   solve(boardCopy4, width, height, mirrorsCopy4) ||
+                                   solve(boardCopy4, width, height, mirrorsCopy4)) : false) ||
                                    solve(boardCopy5, width, height, mirrorsCopy5);
                         } else {
                             vector<vector<Cell>> boardCopy1(board);
@@ -483,7 +540,8 @@ bool solve(vector<vector<Cell>> &board, unsigned int width, unsigned int height,
                             vector<Cell> mirrorsCopy7;
                             vector<Cell> mirrorsCopy8;
                             vector<Cell> mirrorsCopy9;
-                            for (auto &m : mirrors) {
+
+                            for (auto &m : mirrorsCopy) {
                                 mirrorsCopy1.push_back(m.copyCell());
                                 mirrorsCopy2.push_back(m.copyCell());
                                 mirrorsCopy3.push_back(m.copyCell());
@@ -494,30 +552,31 @@ bool solve(vector<vector<Cell>> &board, unsigned int width, unsigned int height,
                                 mirrorsCopy8.push_back(m.copyCell());
                                 mirrorsCopy9.push_back(m.copyCell());
                             }
+                            mirrorsCopy9.push_back(mirrorToPut.copyCell());
 
-                            putMirror(boardCopy1, width, height, mirrorsCopy1, x, y, 0);
-                            putMirror(boardCopy2, width, height, mirrorsCopy2, x, y, 1);
-                            putMirror(boardCopy3, width, height, mirrorsCopy3, x, y, 2);
-                            putMirror(boardCopy4, width, height, mirrorsCopy4, x, y, 3);
-                            putMirror(boardCopy5, width, height, mirrorsCopy5, x, y, 4);
-                            putMirror(boardCopy6, width, height, mirrorsCopy6, x, y, 5);
-                            putMirror(boardCopy7, width, height, mirrorsCopy7, x, y, 6);
-                            putMirror(boardCopy8, width, height, mirrorsCopy8, x, y, 7);
+                            putMirror(boardCopy1, width, height, x, y, mirrorToPut, 0);
+                            putMirror(boardCopy2, width, height, x, y, mirrorToPut, 1);
+                            putMirror(boardCopy3, width, height, x, y, mirrorToPut, 2);
+                            putMirror(boardCopy4, width, height, x, y, mirrorToPut, 3);
+                            putMirror(boardCopy5, width, height, x, y, mirrorToPut, 4);
+                            putMirror(boardCopy6, width, height, x, y, mirrorToPut, 5);
+                            putMirror(boardCopy7, width, height, x, y, mirrorToPut, 6);
+                            putMirror(boardCopy8, width, height, x, y, mirrorToPut, 7);
 
-                            boardCopy9[x][y].setType(VISITED);
+                            cell.setMirrorChecked(mirrorToPut.getCellType(), true);
                             // shuffle mirrors
-                            if (!mirrorsCopy9.empty()) {
-                                rotate(mirrorsCopy9.begin(), mirrorsCopy9.end() - 1, mirrorsCopy9.end());
-                            }
+//                            if (!mirrorsCopy9.empty()) {
+//                                rotate(mirrorsCopy9.begin(), mirrorsCopy9.end() - 1, mirrorsCopy9.end());
+//                            }
 
-                            return solve(boardCopy1, width, height, mirrorsCopy1) ||
+                            return (notPartiallyChecked ? (solve(boardCopy1, width, height, mirrorsCopy1) ||
                                    solve(boardCopy2, width, height, mirrorsCopy2) ||
                                    solve(boardCopy3, width, height, mirrorsCopy3) ||
                                    solve(boardCopy4, width, height, mirrorsCopy4) ||
                                    solve(boardCopy5, width, height, mirrorsCopy5) ||
                                    solve(boardCopy6, width, height, mirrorsCopy6) ||
                                    solve(boardCopy7, width, height, mirrorsCopy7) ||
-                                   solve(boardCopy8, width, height, mirrorsCopy8) ||
+                                   solve(boardCopy8, width, height, mirrorsCopy8)) : false) ||
                                    solve(boardCopy9, width, height, mirrorsCopy9);
                         }
                 }
@@ -532,13 +591,10 @@ bool solve(vector<vector<Cell>> &board, unsigned int width, unsigned int height,
     return false;
 }
 
-void putMirror(vector<vector<Cell>> &board, unsigned int width, unsigned int height,
-               vector<Cell> &mirrors, unsigned int x, unsigned int y, unsigned short mirrorDirection) {
+void putMirror(vector<vector<Cell>> &board, unsigned int width, unsigned int height, unsigned int x, unsigned int y,
+               Cell &mirror, unsigned short mirrorDirection) {
     Cell &cell = board[x][y];
-
-    Cell mirror = mirrors.back();
-    mirrors.pop_back();
-
+    
     for (auto ray : cell.getRays()) {
         Cell tmpCell = Cell(NONE, x, y, ray.direction, ray.color);
         tmpCell.addRay(ray);
