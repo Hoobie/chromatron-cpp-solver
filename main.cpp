@@ -468,15 +468,6 @@ bool solve(vector<vector<Cell>> &board, unsigned int width, unsigned int height,
         for (unsigned int x = 1; x < width; x++) {
             Cell &cell = board[x][y];
             if (!cell.getRays().empty() && cell.getCellType() == NONE) {
-                bool checked = true;
-                for (auto mirror : mirrors) {
-                    if (!cell.isMirrorChecked(mirror.getCellType())) {
-                        checked = false;
-                    }
-                }
-                if (checked) {
-                    continue;
-                }
                 for (auto &mirror : mirrors) {
 
                         if (cell.isMirrorChecked(mirror.getCellType())) {
