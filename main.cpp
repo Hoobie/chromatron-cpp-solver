@@ -2,7 +2,7 @@
 #include <vector>
 #include <algorithm>
 
-#define DEBUG true
+#define DEBUG false
 
 using namespace std;
 
@@ -450,7 +450,7 @@ void printBoard(vector<vector<Cell>> board, unsigned int width, unsigned int hei
 }
 
 bool solve(vector<vector<Cell>> &board, unsigned int width, unsigned int height, vector<Cell> &mirrors) {
-    printBoard(board, width, height, mirrors);
+    //printBoard(board, width, height, mirrors);
     if (isBoardCompleted(board, width, height)) {
         printBoard(board, width, height, mirrors);
         return true;
@@ -510,7 +510,6 @@ bool solve(vector<vector<Cell>> &board, unsigned int width, unsigned int height,
                             putMirror(boardCopy3, width, height, x, y, mirrorToPut, 2);
                             putMirror(boardCopy4, width, height, x, y, mirrorToPut, 3);
 
-                            cell.setMirrorChecked(mirrorToPut.getCellType());
                             // shuffle mirrors
 //                            if (!mirrorsCopy5.empty()) {
 //                                rotate(mirrorsCopy5.begin(), mirrorsCopy5.end() - 1, mirrorsCopy5.end());
@@ -564,7 +563,6 @@ bool solve(vector<vector<Cell>> &board, unsigned int width, unsigned int height,
                             putMirror(boardCopy7, width, height, x, y, mirrorToPut, 6);
                             putMirror(boardCopy8, width, height, x, y, mirrorToPut, 7);
 
-                            cell.setMirrorChecked(mirrorToPut.getCellType());
                             // shuffle mirrors
 //                            if (!mirrorsCopy9.empty()) {
 //                                rotate(mirrorsCopy9.begin(), mirrorsCopy9.end() - 1, mirrorsCopy9.end());
