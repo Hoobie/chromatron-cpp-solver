@@ -179,16 +179,16 @@ public:
         }
     }
 
-    void setMirrorChecked(cell_type type) {
+    void setMirrorChecked(cell_type type, bool checked) {
         switch (type) {
             case LU:
-                luMirrorChecked = true;
+                luMirrorChecked = checked;
                 break;
             case LP:
-                lpMirrorChecked = true;
+                lpMirrorChecked = checked;
                 break;
             case LK:
-                lkMirrorChecked = true;
+                lkMirrorChecked = checked;
                 break;
             default:
                 throw 6;
@@ -381,9 +381,7 @@ int main() {
         cin >> type >> x >> y >> direction >> color;
 
         shared_ptr<Cell> cell = shared_ptr<Cell>(new Cell(type, x, y, direction, color));
-        if (isMirror(cell->getCellType())) {
-            cell->setMirrorChecked(cell->getCellType());
-        }
+
         devices.push_back(cell);
         board[x][y] = cell;
     }
@@ -471,14 +469,14 @@ bool solve(vector<vector<shared_ptr<Cell>>> &board, unsigned int width, unsigned
     }
     for (unsigned int y = 1; y < height; y++) {
         for (unsigned int x = 1; x < width; x++) {
-            shared_ptr<Cell> &cell = board[x][y];
+            shared_ptr<Cell> cell = board[x][y];
             if (cell && !cell->getRays().empty() && cell->getCellType() == NONE) {
                 for (auto &mirror : mirrors) {
 
                     if (cell->isMirrorChecked(mirror->getCellType())) {
                         continue;
                     }
-                    cell->setMirrorChecked(mirror->getCellType());
+                    cell->setMirrorChecked(mirror->getCellType(), true);
 
                     unsigned short mirrorDirections = 8;
                     if (mirror->getCellType() == LP) {
@@ -489,7 +487,10 @@ bool solve(vector<vector<shared_ptr<Cell>>> &board, unsigned int width, unsigned
                         putMirror(board, width, height, x, y, mirror, mirrorDirection);
 
                         vector<shared_ptr<Cell>> mirrorsCopy(mirrors);
-                        const vector<shared_ptr<Cell>>::iterator &iterator = find(mirrorsCopy.begin(), mirrorsCopy.end(), mirror);
+                        const vector<shared_ptr<Cell>>::iterator &iterator =
+                                find_if(mirrorsCopy.begin(), mirrorsCopy.end(), [&](shared_ptr<Cell> const& p) {
+                            return *p == *mirror;
+                        });
                         mirrorsCopy.erase(iterator);
 
                         if (solve(board, width, height, mirrorsCopy)) {
@@ -497,7 +498,7 @@ bool solve(vector<vector<shared_ptr<Cell>>> &board, unsigned int width, unsigned
                         }
                         reflectRays(board, width, height, mirror, true);
                         board[x][y] = cell;
-                        for (auto ray : cell->getRays()) {
+                        for (auto ray : mirror->getRays()) {
                             shared_ptr<Cell> tmpCell = shared_ptr<Cell>(new Cell(NONE, x, y, ray.direction, ray.color));
                             tmpCell->addRay(ray);
                             emitRay(board, width, height, tmpCell, false);
@@ -508,6 +509,7 @@ bool solve(vector<vector<shared_ptr<Cell>>> &board, unsigned int width, unsigned
                         return true;
                     }
                     mirror->clearRays();
+                    cell->setMirrorChecked(mirror->getCellType(), false);
                     board[x][y] = cell;
                 }
             }
@@ -574,7 +576,7 @@ void emitRay(vector<vector<shared_ptr<Cell>>> &board, unsigned int width, unsign
     for (pair<unsigned int, unsigned int> i(laser->getX() + steps.first, laser->getY() + steps.second);
          i.first > 0 && i.first < width && i.second > 0 && i.second < height; i.first += steps.first, i.second += steps.second) {
 
-        shared_ptr<Cell> cell = board[i.first][i.second];
+        shared_ptr<Cell> &cell = board[i.first][i.second];
         if (!cell) {
             cell = make_shared<Cell>();
             board[i.first][i.second] = cell;
