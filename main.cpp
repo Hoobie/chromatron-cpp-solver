@@ -145,9 +145,6 @@ class Cell {
      */
     unsigned short direction;
     vector<ray_type> rays;
-    bool luMirrorChecked;
-    bool lpMirrorChecked;
-    bool lkMirrorChecked;
 public:
     Cell();
     Cell(cell_type type, unsigned int x, unsigned int y, unsigned short direction, color_type color);
@@ -165,43 +162,11 @@ public:
     void addRay(ray_type ray);
     vector<ray_type>& getRays();
     void clearRays();
-
-    bool isMirrorChecked(cell_type mirrorType) {
-        switch (mirrorType) {
-            case LU:
-                return luMirrorChecked;
-            case LP:
-                return lpMirrorChecked;
-            case LK:
-                return lkMirrorChecked;
-            default:
-                throw 6;
-        }
-    }
-
-    void setMirrorChecked(cell_type type, bool checked) {
-        switch (type) {
-            case LU:
-                luMirrorChecked = checked;
-                break;
-            case LP:
-                lpMirrorChecked = checked;
-                break;
-            case LK:
-                lkMirrorChecked = checked;
-                break;
-            default:
-                throw 6;
-        }
-    }
 };
 
 Cell::Cell() {
     this->type = NONE;
     this->color = BLANK;
-    this->luMirrorChecked = false;
-    this->lpMirrorChecked = false;
-    this->lkMirrorChecked = false;
 }
 
 Cell::Cell(cell_type type, unsigned int x, unsigned int y, unsigned short direction, color_type color) {
@@ -210,9 +175,6 @@ Cell::Cell(cell_type type, unsigned int x, unsigned int y, unsigned short direct
     this->y = y;
     this->direction = direction;
     this->color = color;
-    this->luMirrorChecked = false;
-    this->lpMirrorChecked = false;
-    this->lkMirrorChecked = false;
 }
 
 Cell::Cell(string type, unsigned int x, unsigned int y, unsigned short direction, string color) {
@@ -221,9 +183,6 @@ Cell::Cell(string type, unsigned int x, unsigned int y, unsigned short direction
     this->y = y;
     this->direction = direction;
     this->color = toColor(color);
-    this->luMirrorChecked = false;
-    this->lpMirrorChecked = false;
-    this->lkMirrorChecked = false;
 }
 
 cell_type Cell::getCellType() {
@@ -351,7 +310,8 @@ void Cell::clearRays() {
 void emitRay(vector<vector<shared_ptr<Cell>>> &board, unsigned int width, unsigned int height, shared_ptr<Cell> &laser, bool clear);
 pair<short, short> getRaySteps(unsigned short direction);
 unsigned short laserToPipeDirection(unsigned short laserDirection);
-bool solve(vector<vector<shared_ptr<Cell>>> &board, unsigned int width, unsigned int height, vector<shared_ptr<Cell>> &mirrors);
+bool solve(vector<vector<shared_ptr<Cell>>> &board, unsigned int width, unsigned int height, vector<shared_ptr<Cell>> allMirrors,
+           vector<shared_ptr<Cell>> &mirrorsToUse, vector<string> &mirrorsSnapshots);
 void printBoard(vector<vector<shared_ptr<Cell>>> board, unsigned int width, unsigned int height, vector<shared_ptr<Cell>> unusedMirrors);
 void putMirror(vector<vector<shared_ptr<Cell>>> &board, unsigned int width, unsigned int height, unsigned int x, unsigned int y,
                shared_ptr<Cell> &mirror, unsigned short mirrorDirection);
@@ -397,9 +357,11 @@ int main() {
     }
 
     // solve
-    if (!solve(board, width, height, mirrors)) {
+    vector<string> *snapshots = new vector<string>();
+    if (!solve(board, width, height, mirrors, mirrors, *snapshots)) {
         cout << "Solution not found :(" << endl;
     }
+    delete snapshots;
 
     return 0;
 };
@@ -458,42 +420,52 @@ void printBoard(vector<vector<shared_ptr<Cell>>> board, unsigned int width, unsi
     }
 }
 
-bool solve(vector<vector<shared_ptr<Cell>>> &board, unsigned int width, unsigned int height, vector<shared_ptr<Cell>> &mirrors) {
-    printBoard(board, width, height, mirrors);
+bool solve(vector<vector<shared_ptr<Cell>>> &board, unsigned int width, unsigned int height, vector<shared_ptr<Cell>> allMirrors,
+           vector<shared_ptr<Cell>> &mirrorsToUse, vector<string> &mirrorsSnapshots) {
+    printBoard(board, width, height, mirrorsToUse);
     if (isBoardCompleted(board, width, height)) {
-        printBoard(board, width, height, mirrors);
+        printBoard(board, width, height, mirrorsToUse);
         return true;
     }
-    if (mirrors.empty()) {
+    if (mirrorsToUse.empty()) {
         return false;
     }
     for (unsigned int y = 1; y < height; y++) {
         for (unsigned int x = 1; x < width; x++) {
             shared_ptr<Cell> cell = board[x][y];
             if (cell && !cell->getRays().empty() && cell->getCellType() == NONE) {
-                for (auto &mirror : mirrors) {
-
-                    if (cell->isMirrorChecked(mirror->getCellType())) {
-                        continue;
-                    }
-                    cell->setMirrorChecked(mirror->getCellType(), true);
-
+                for (auto &mirror : mirrorsToUse) {
                     unsigned short mirrorDirections = 8;
                     if (mirror->getCellType() == LP) {
                         mirrorDirections = 4;
                     }
 
                     for (unsigned short mirrorDirection = 0; mirrorDirection < mirrorDirections; mirrorDirection++) {
+                        string mirrorSnapshot = "";
+                        for (auto m : allMirrors) {
+                            if (m == mirror) {
+                                mirrorSnapshot += cellTypeToString(m->getCellType()) + to_string(x) + to_string(y) + to_string(mirrorDirection);
+                            } else {
+                                mirrorSnapshot += cellTypeToString(m->getCellType()) + to_string(m->getX()) + to_string(m->getY()) + to_string(m->getDirection());
+                            }
+                        }
+                        const vector<string>::iterator &snapshot_iterator = find(mirrorsSnapshots.begin(), mirrorsSnapshots.end(), mirrorSnapshot);
+                        if (snapshot_iterator == mirrorsSnapshots.end()) {
+                            mirrorsSnapshots.push_back(mirrorSnapshot);
+                        } else {
+                            continue;
+                        }
+
                         putMirror(board, width, height, x, y, mirror, mirrorDirection);
 
-                        vector<shared_ptr<Cell>> mirrorsCopy(mirrors);
+                        vector<shared_ptr<Cell>> mirrorsCopy(mirrorsToUse);
                         const vector<shared_ptr<Cell>>::iterator &iterator =
                                 find_if(mirrorsCopy.begin(), mirrorsCopy.end(), [&](shared_ptr<Cell> const& p) {
                             return *p == *mirror;
                         });
                         mirrorsCopy.erase(iterator);
 
-                        if (solve(board, width, height, mirrorsCopy)) {
+                        if (solve(board, width, height, allMirrors, mirrorsCopy, mirrorsSnapshots)) {
                             return true;
                         }
                         reflectRays(board, width, height, mirror, true);
@@ -505,11 +477,10 @@ bool solve(vector<vector<shared_ptr<Cell>>> &board, unsigned int width, unsigned
                         }
                         mirror->clearRays();
                     }
-                    if (solve(board, width, height, mirrors)) {
+                    if (solve(board, width, height, allMirrors, mirrorsToUse, mirrorsSnapshots)) {
                         return true;
                     }
                     mirror->clearRays();
-                    cell->setMirrorChecked(mirror->getCellType(), false);
                     board[x][y] = cell;
                 }
             }
