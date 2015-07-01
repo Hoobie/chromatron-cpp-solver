@@ -311,7 +311,7 @@ pair<short, short> getRaySteps(unsigned short direction);
 unsigned short laserToPipeDirection(unsigned short laserDirection);
 bool solve(vector<vector<shared_ptr<Cell>>> &board, unsigned int width, unsigned int height,
            vector<shared_ptr<Cell>> allMirrors, vector<shared_ptr<Cell>> &mirrorsToUse,
-           map<long, bool> &mirrorsSnapshots, vector<shared_ptr<Cell>> lasers);
+           map<long, bool> &mirrorsSnapshots, vector<shared_ptr<Cell>> lasers, bool reverse);
 void printBoard(vector<vector<shared_ptr<Cell>>> board, unsigned int width, unsigned int height);
 void putMirror(vector<vector<shared_ptr<Cell>>> &board, unsigned int width, unsigned int height, unsigned int x, unsigned int y,
                shared_ptr<Cell> &mirror, unsigned short mirrorDirection);
@@ -364,7 +364,7 @@ int main() {
 
     // solve
     map<long, bool> snapshots = map<long, bool>();
-    if (solve(board, width, height, mirrors, mirrors, snapshots, lasers)) {
+    if (solve(board, width, height, mirrors, mirrors, snapshots, lasers, false)) {
         if (DEBUG) {
             cout << "Solution found! :)" << endl;
         }
@@ -434,7 +434,7 @@ void printBoard(vector<vector<shared_ptr<Cell>>> board, unsigned int width, unsi
 
 bool solve(vector<vector<shared_ptr<Cell>>> &board, unsigned int width, unsigned int height,
            vector<shared_ptr<Cell>> allMirrors, vector<shared_ptr<Cell>> &mirrorsToUse,
-           map<long, bool> &mirrorsSnapshots, vector<shared_ptr<Cell>> lasers) {
+           map<long, bool> &mirrorsSnapshots, vector<shared_ptr<Cell>> lasers, bool reverse) {
     for (unsigned int y = 1; y < height; y++) {
         for (unsigned int x = 1; x < width; x++) {
             shared_ptr<Cell> cell = board[x][y];
@@ -455,8 +455,16 @@ bool solve(vector<vector<shared_ptr<Cell>>> &board, unsigned int width, unsigned
     if (mirrorsToUse.empty()) {
         return false;
     }
-    for (unsigned int y = 1; y < height; y++) {
-        for (unsigned int x = 1; x < width; x++) {
+    int step = 1;
+    unsigned int startX = 1;
+    unsigned int startY = 1;
+    if (reverse) {
+        step = -1;
+        startX = width - 1;
+        startY = height - 1;
+    }
+    for (unsigned int y = startY; y > 0 && y < height; y += step) {
+        for (unsigned int x = startX; x > 0 && x < width; x += step) {
             shared_ptr<Cell> cell = board[x][y];
             if (cell && cell->getCellType() == NONE && !cell->getRays().empty()) {
                 for (auto &mirror : mirrorsToUse) {
@@ -516,7 +524,8 @@ bool solve(vector<vector<shared_ptr<Cell>>> &board, unsigned int width, unsigned
                         });
                         mirrorsCopy.erase(iterator);
 
-                        if (solve(board, width, height, allMirrors, mirrorsCopy, mirrorsSnapshots, lasers)) {
+                        if (solve(board, width, height, allMirrors, mirrorsCopy, mirrorsSnapshots,
+                                  lasers, reverse)) {
                             return true;
                         }
                         board[x][y] = cell;
@@ -531,8 +540,10 @@ bool solve(vector<vector<shared_ptr<Cell>>> &board, unsigned int width, unsigned
                         mirror->setDirection(0);
                     }
                     if (!foundNewSnapshot) continue;
+                    reverse = !reverse;
                     rotate(mirrorsToUse.begin(), mirrorsToUse.end()-1, mirrorsToUse.end());
-                    if (solve(board, width, height, allMirrors, mirrorsToUse, mirrorsSnapshots, lasers)) {
+                    if (solve(board, width, height, allMirrors, mirrorsToUse, mirrorsSnapshots,
+                              lasers, reverse)) {
                         return true;
                     }
                 }
