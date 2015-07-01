@@ -4,7 +4,7 @@
 #include <memory>
 #include <map>
 
-#define DEBUG true
+#define DEBUG false
 
 using namespace std;
 
@@ -321,8 +321,9 @@ void emitRay(vector<vector<shared_ptr<Cell>>> &board, unsigned int width, unsign
 pair<short, short> getRaySteps(unsigned short direction);
 unsigned short laserToPipeDirection(unsigned short laserDirection);
 bool solve(vector<vector<shared_ptr<Cell>>> &board, unsigned int width, unsigned int height,
-           vector<shared_ptr<Cell>> allMirrors, vector<shared_ptr<Cell>> &mirrorsToUse, map<long, bool> &mirrorsSnapshots);
-void printBoard(vector<vector<shared_ptr<Cell>>> board, unsigned int width, unsigned int height, vector<shared_ptr<Cell>> unusedMirrors);
+           vector<shared_ptr<Cell>> allMirrors, vector<shared_ptr<Cell>> &mirrorsToUse,
+           map<long, bool> &mirrorsSnapshots, vector<shared_ptr<Cell>> lasers);
+void printBoard(vector<vector<shared_ptr<Cell>>> board, unsigned int width, unsigned int height);
 void putMirror(vector<vector<shared_ptr<Cell>>> &board, unsigned int width, unsigned int height, unsigned int x, unsigned int y,
                shared_ptr<Cell> &mirror, unsigned short mirrorDirection);
 unsigned short getReflectionDirection(cell_type mirror_type, unsigned short mirrorDirection, unsigned short rayDirection);
@@ -335,6 +336,7 @@ int main() {
 
     vector<shared_ptr<Cell>> devices;
     vector<shared_ptr<Cell>> mirrors;
+    vector<shared_ptr<Cell>> lasers;
 
     cin >> width >> height >> devicesCount;
     // extend board
@@ -360,6 +362,7 @@ int main() {
     int i = 0;
     for (auto &dev : devices) {
         if (isLaser(dev->getCellType())) {
+            lasers.push_back(dev);
             emitRay(board, width, height, dev, false);
         }
         if (isMirror(dev->getCellType())) {
@@ -370,8 +373,11 @@ int main() {
 
     // solve
     map<long, bool> snapshots = map<long, bool>();
-    if (solve(board, width, height, mirrors, mirrors, snapshots)) {
-        printBoard(board, width, height, mirrors);
+    if (solve(board, width, height, mirrors, mirrors, snapshots, lasers)) {
+        if (DEBUG) {
+            cout << "Solution found! :)" << endl;
+        }
+        printBoard(board, width, height);
     } else {
         cout << "Solution not found :(" << endl;
     }
@@ -379,7 +385,7 @@ int main() {
     return 0;
 };
 
-void printBoard(vector<vector<shared_ptr<Cell>>> board, unsigned int width, unsigned int height, vector<shared_ptr<Cell>> unusedMirrors) {
+void printBoard(vector<vector<shared_ptr<Cell>>> board, unsigned int width, unsigned int height) {
     if (DEBUG) {
         for (unsigned int y = 1; y < height; y++) {
             for (unsigned int x = 1; x < width; x++) {
@@ -398,9 +404,6 @@ void printBoard(vector<vector<shared_ptr<Cell>>> board, unsigned int width, unsi
     }
     cout << width - 1 << " " << height - 1 << endl;
     cout << devicesCount << endl;
-    for (auto unusedMirror : unusedMirrors) {
-        cout << cellTypeToString(unusedMirror->getCellType()) << " 0 0 " << unusedMirror->getDirection() << " 0" << endl;
-    }
     for (unsigned int y = 1; y < height; y++) {
         for (unsigned int x = 1; x < width; x++) {
             shared_ptr<Cell> cell = board[x][y];
@@ -435,24 +438,24 @@ void printBoard(vector<vector<shared_ptr<Cell>>> board, unsigned int width, unsi
 }
 
 bool solve(vector<vector<shared_ptr<Cell>>> &board, unsigned int width, unsigned int height,
-           vector<shared_ptr<Cell>> allMirrors, vector<shared_ptr<Cell>> &mirrorsToUse, map<long, bool> &mirrorsSnapshots) {
+           vector<shared_ptr<Cell>> allMirrors, vector<shared_ptr<Cell>> &mirrorsToUse,
+           map<long, bool> &mirrorsSnapshots, vector<shared_ptr<Cell>> lasers) {
+    for (unsigned int y = 1; y < height; y++) {
+        for (unsigned int x = 1; x < width; x++) {
+            shared_ptr<Cell> cell = board[x][y];
+            if (cell) {
+                cell->clearRays();
+            }
+        }
+    }
+    for (auto laser : lasers) {
+        emitRay(board, width, height, laser, false);
+    }
     if (isBoardCompleted(board, width, height)) {
         return true;
     }
     if (DEBUG) {
-        printBoard(board, width, height, mirrorsToUse);
-    }
-    for (unsigned int y = 1; y < height; y++) {
-        for (unsigned int x = 1; x < width; x++) {
-            shared_ptr<Cell> &cell = board[x][y];
-            if (cell && isMirror(cell->getCellType()) && cell->getRays().empty()) {
-                cell->setX(0);
-                cell->setY(0);
-                cell->setDirection(0);
-                mirrorsToUse.push_back(cell);
-                board[x][y] = make_shared<Cell>();
-            }
-        }
+        printBoard(board, width, height);
     }
     if (mirrorsToUse.empty()) {
         return false;
@@ -466,7 +469,7 @@ bool solve(vector<vector<shared_ptr<Cell>>> &board, unsigned int width, unsigned
                     if (mirror->getCellType() == LP) {
                         mirrorDirections = 4;
                     }
-                    bool passed = false;
+                    bool foundNewSnapshot = false;
                     for (unsigned short mirrorDirection = 0; mirrorDirection < mirrorDirections; mirrorDirection++) {
                         long mirrorsHashcode = 17;
                         for (auto m : allMirrors) {
@@ -488,7 +491,21 @@ bool solve(vector<vector<shared_ptr<Cell>>> &board, unsigned int width, unsigned
                             continue;
                         }
                         mirrorsSnapshots[mirrorsHashcode] = true;
-                        passed = true;
+                        foundNewSnapshot = true;
+
+//                        bool put = true;
+//                        for (auto ray : cell->getRays()) {
+//                            try {
+//                                if (getReflectionDirection(mirror->getCellType(), mirrorDirection, ray.direction) < 7) {
+//                                    break;
+//                                }
+//                            } catch (int i) {
+//                            }
+//                            put = false;
+//                        }
+//                        if (put) {
+//                            continue;
+//                        }
 
                         putMirror(board, width, height, x, y, mirror, mirrorDirection);
 
@@ -499,22 +516,22 @@ bool solve(vector<vector<shared_ptr<Cell>>> &board, unsigned int width, unsigned
                         });
                         mirrorsCopy.erase(iterator);
 
-                        if (solve(board, width, height, allMirrors, mirrorsCopy, mirrorsSnapshots)) {
+                        if (solve(board, width, height, allMirrors, mirrorsCopy, mirrorsSnapshots, lasers)) {
                             return true;
                         }
-                        reflectRays(board, width, height, mirror, true);
                         board[x][y] = cell;
-                        for (auto ray : mirror->getRays()) {
-                            shared_ptr<Cell> tmpCell = make_shared<Cell>(NONE, x, y, ray.direction, ray.color);
-                            emitRay(board, width, height, tmpCell, false);
-                        }
+//                        reflectRays(board, width, height, mirror, true);
+//                        for (auto ray : cell->getRays()) {
+//                            shared_ptr<Cell> tmpCell = make_shared<Cell>(NONE, x, y, ray.direction, ray.color);
+//                            emitRay(board, width, height, tmpCell, false);
+//                        }
                         mirror->clearRays();
                         mirror->setX(0);
                         mirror->setY(0);
                         mirror->setDirection(0);
                     }
-                    if (!passed) continue;
-                    if (solve(board, width, height, allMirrors, mirrorsToUse, mirrorsSnapshots)) {
+                    if (!foundNewSnapshot) continue;
+                    if (solve(board, width, height, allMirrors, mirrorsToUse, mirrorsSnapshots, lasers)) {
                         return true;
                     }
                 }
@@ -527,21 +544,21 @@ bool solve(vector<vector<shared_ptr<Cell>>> &board, unsigned int width, unsigned
 void putMirror(vector<vector<shared_ptr<Cell>>> &board, unsigned int width, unsigned int height, unsigned int x, unsigned int y,
                shared_ptr<Cell> &mirror, unsigned short mirrorDirection) {
 
-    shared_ptr<Cell> &cell = board[x][y];
+    shared_ptr<Cell> cell = board[x][y];
 
-    for (auto ray : cell->getRays()) {
-        shared_ptr<Cell> tmpCell = shared_ptr<Cell>(new Cell(NONE, x, y, ray.direction, ray.color));
-        emitRay(board, width, height, tmpCell, true);
-
-        mirror->addRay({ray.direction, ray.color});
-    }
+//    for (auto ray : cell->getRays()) {
+//        shared_ptr<Cell> tmpCell = shared_ptr<Cell>(new Cell(NONE, x, y, ray.direction, ray.color));
+//        emitRay(board, width, height, tmpCell, true);
+//
+//        mirror->addRay({ray.direction, ray.color});
+//    }
 
     mirror->setDirection(mirrorDirection);
     mirror->setX(x);
     mirror->setY(y);
     board[x][y] = mirror;
 
-    reflectRays(board, width, height, mirror, false);
+//    reflectRays(board, width, height, mirror, false);
 }
 
 void reflectRays(vector<vector<shared_ptr<Cell>>> &board, unsigned int width, unsigned int height, shared_ptr<Cell> &mirror, bool clear) {
@@ -606,9 +623,11 @@ void emitRay(vector<vector<shared_ptr<Cell>>> &board, unsigned int width, unsign
         ray_type ray = { laser->getDirection(), laser->getColor() };
         const vector<ray_type>::iterator &iterator = find(rays.begin(), rays.end(), ray);
 
-        if (iterator != rays.end() && !clear) {
-            return;
-        } else if (iterator == rays.end() && clear) {
+        if (iterator != rays.end() && clear) {
+            //rays.erase(iterator);
+        } else if (iterator == rays.end() && !clear) {
+            cell->addRay(ray);
+        } else {
             return;
         }
 
@@ -616,13 +635,8 @@ void emitRay(vector<vector<shared_ptr<Cell>>> &board, unsigned int width, unsign
             reflectRays(board, width, height, cell, clear);
         }
 
-        rays = cell->getRays();
-        const vector<ray_type>::iterator &iterator2 = find(rays.begin(), rays.end(), ray);
-
-        if (iterator2 != rays.end() && clear) {
-            rays.erase(iterator2);
-        } else if (iterator2 == rays.end() && !clear) {
-            cell->addRay(ray);
+        if (iterator != rays.end() && clear) {
+            rays.erase(iterator);
         }
 
         if (isMirror(cellType)) {
