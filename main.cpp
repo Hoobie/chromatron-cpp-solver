@@ -288,7 +288,7 @@ ostream& operator<<(ostream& os, const Cell& c) {
         return os;
     }
     if (isPipe(c.type)) {
-        os << "P";
+        os << "R";
         return os;
     }
     return os;
