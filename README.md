@@ -5,11 +5,11 @@
 ### Rok akademicki: 2014/2015
 
 ###Spis treści:
-1. Zarys algorytmu
-2. Pomysły optymalizacji algorytmu
-3. Możliwości dalszego rozwoju
+1. Zarys algorytmu.
+2. Pomysły optymalizacji algorytmu.
+3. Możliwości dalszego rozwoju.
 
-1. Zarys algorytmu:
+###Ad. 1. Zarys algorytmu:
 Zastosowałem algorytm typu brute-force z optymalizacjami, które biorą pod uwagę tylko "sensowne" stawianie luster.
 Do opisu algorytmu użyłem pseudokodu, przypominającego język C.
 ```C++
@@ -18,10 +18,10 @@ Do opisu algorytmu użyłem pseudokodu, przypominającego język C.
 // mirrorsSnapshots - mapa zawierająca hashcode'y wykorzystanych ułożeń luster
 bool solve(Cell board[][], int width, int height, Cell allMirrors[], Cell mirrorsToUse[], map mirrorsSnapshots, Cell lasers[], bool reverse) {
     // wyczyść planszę z promieni
-    clearRaysFromBoard(board, width, height); 
+    clearRaysFromTheBoard(board, width, height); 
     
     // przerysuj promienie
-    addRaysToBoard(board, width, height);
+    addRaysToTheBoard(board, width, height);
     
     if (isBoardCompleted(board, width, height)) {
         // jeśli plansza jest rozwiązana, zakończ sukcesem
