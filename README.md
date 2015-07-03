@@ -6,6 +6,7 @@
 ![AGH](http://eurostudy.info/images/content/agh_logo_agh.jpg)
 ### Rok akademicki: 2014/2015
 
+
 ###Spis treści:
 1. Zarys algorytmu.
 2. Zastosowane pomysły optymalizacji algorytmu.
