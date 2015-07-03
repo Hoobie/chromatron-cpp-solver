@@ -1,16 +1,20 @@
 # Hubert Słojewski
 ## Projekt z przedmiotu Algorytmy dla Problemów Trudnych Obliczeniowo
 ### Program rozwiązujący zadania oparte na grze Chromatron
+
+
 ![AGH](http://eurostudy.info/images/content/agh_logo_agh.jpg)
 ### Rok akademicki: 2014/2015
 
 ###Spis treści:
 1. Zarys algorytmu.
-2. Pomysły optymalizacji algorytmu.
+2. Zastosowane pomysły optymalizacji algorytmu.
 3. Możliwości dalszego rozwoju.
+
 
 ###Ad. 1. Zarys algorytmu:
 Zastosowałem algorytm typu brute-force z optymalizacjami, które biorą pod uwagę tylko "sensowne" stawianie luster.
+
 Do opisu algorytmu użyłem pseudokodu, przypominającego język C.
 ```C++
 // board - 2-wymiarowa plansza zawierająca obiekty typu Cell
@@ -21,7 +25,7 @@ bool solve(Cell board[][], int width, int height, Cell allMirrors[], Cell mirror
     clearRaysFromTheBoard(board, width, height); 
     
     // przerysuj promienie
-    addRaysToTheBoard(board, width, height);
+    addRaysToTheBoard(board, width, height, lasers);
     
     if (isBoardCompleted(board, width, height)) {
         // jeśli plansza jest rozwiązana, zakończ sukcesem
@@ -88,5 +92,34 @@ bool solve(Cell board[][], int width, int height, Cell allMirrors[], Cell mirror
     return false;
 }
 ```
+
+
+### Ad. 2. Zastosowane pomysły optymalizacji algorytmu:
+1.  Stawianie luster tylko tam, gdzie jest to opłacalne.
+    * Po pierwsze lustra stawiane są tylko na promieniach.
+    * Po drugie musi istnieć odbicie jakiegokolwiek promienia w kierunku środka planszy (odbicia poza planszę nie mają sensu).
+    * Aby szybko sprawdzić, czy ułożenie luster się nie powtórzyło, dla każdego ułożenia wyliczany jest jego hashcode zgodnie ze wzorem:
+    ```C++
+    long mirrorsHashcode = 17;
+    for (mirror : allMirrors) {
+        mirrorsHashcode = mirrorsHashcode * 31 + mirror->getCellType();
+        mirrorsHashcode = mirrorsHashcode * 31 + mirror->getX();
+        mirrorsHashcode = mirrorsHashcode * 31 + mirror->getY();
+        mirrorsHashcode = mirrorsHashcode * 31 + mirror->getDirection();
+    }
+    ```
+2. Każde lustro stawiam od różnych stron planszy, co znacznie przyspiesza znalezienie rozwiązania.
+3. Do sprawdzenia, czy plansza jest rozwiązana, stosuję arytmetykę kolorów - kolor jest typem wyliczeniowym - na zasadzie:
+    ```C++
+    for (ray : cell->getRays()) {
+        colorSum += ray.color;
+    }
+    ```
+    
+    
+### Ad. 3. Możliwości dalszego rozwoju.
+Przede wszystkim należałoby uniknąć całkowitego przerysowywania planszy. 
+W kodzie źródłowym wykomentowane zostały fragmenty odpowiedzialne za dorysowanie promieni po postawieniu lustra
+oraz zmazywanie niepotrzebnych promieni, jednak nie udało mi się w pełni doprowadzić tego do działania.
 
 Do sporządzenia dokumentacji zastosowano język Markdown.
