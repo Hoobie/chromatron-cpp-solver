@@ -110,11 +110,11 @@ bool solve(Cell board[][], int width, int height, Cell allMirrors[], Cell mirror
     ```
 2. Każde lustro stawiam od różnych stron planszy, co znacznie przyspiesza znalezienie rozwiązania.
 3. Do sprawdzenia, czy plansza jest rozwiązana, stosuję arytmetykę kolorów - kolor jest typem wyliczeniowym - na zasadzie:
-    ```C++
-    for (ray : cell->getRays()) {
-        colorSum += ray.color;
-    }
-    ```
+```C++
+for (ray : cell->getRays()) {
+    colorSum += ray.color;
+}
+```
     
     
 ### Ad. 3. Możliwości dalszego rozwoju.
