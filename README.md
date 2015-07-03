@@ -1,5 +1,6 @@
 # Hubert Słojewski
-## Projekt z przedmiotu Algorytmy dla Problemów Trudnych Obliczeniowo
+## Projekt z przedmiotu 
+## Algorytmy dla Problemów Trudnych Obliczeniowo
 
 <br><br>
 ### Program rozwiązujący zadania oparte na grze Chromatron
