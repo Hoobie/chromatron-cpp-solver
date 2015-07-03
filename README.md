@@ -1,11 +1,11 @@
 # Hubert Słojewski
 ## Projekt z przedmiotu Algorytmy dla Problemów Trudnych Obliczeniowo
+
 ### Program rozwiązujący zadania oparte na grze Chromatron
 
 
 ![AGH](http://eurostudy.info/images/content/agh_logo_agh.jpg)
 ### Rok akademicki: 2014/2015
-
 
 ###Spis treści:
 1. Zarys algorytmu.
